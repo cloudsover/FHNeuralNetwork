@@ -1,4 +1,6 @@
+import collections
 from enum import Enum, auto
+import random
 
 
 class NNData:
@@ -28,23 +30,18 @@ class NNData:
         if y is None:
             y = []
 
-        # Raise error if set sizes do not match
-        if len(x) != len(y):
-            raise DataMismatchError
-
-        # Filter given percentage data through mutator method
-        self.train_percentage = NNData.percentage_limiter(percentage)
-
-        # Setting most internal data to None to avoid errors at this time
-        self.x = None
-        self.y = None
+        self.x = x
+        self.y = y
         self.train_indices = None
         self.train_pool = None
         self.test_indices = None
         self.test_pool = None
 
-        # Calls place-holder method
-        NNData.load_data(self)
+        # Filter given percentage data through mutator method
+        self.train_percentage = NNData.percentage_limiter(percentage)
+
+        # Initializes Data
+        NNData.load_data(self, x, y)
 
     @staticmethod
     def percentage_limiter(percentage: int) -> int:
@@ -59,15 +56,7 @@ class NNData:
             The given value, if between 0 and 100.
             If the value of percentage is below 0, returns 0.
             If the value of percentage is above 100, returns 100.
-
-        Raises:
-            DataMismatchError: An error occurred because the function wasn't
-            able to pass an int through it's filter.
         """
-        try:
-            percentage = int(percentage)
-        except DataMismatchError:
-            raise DataMismatchError
 
         # Mutates Values to upper or lower bounds if bad data is passed
         if percentage < 0:
@@ -75,39 +64,52 @@ class NNData:
         if percentage > 100:
             return 100
         else:
-            return percentage
+            return int(percentage)
 
-    def load_data(self):
+    def load_data(self, x, y):
+        # TODO Docs
         """ Method-stub placeholder"""
-        # TODO check that the lengths of x any y are the same otherwise
-        #  raise datamismatch
 
-        # TODO Assign x and y to the corresponding internal objects self.x
-        #  and self.y
+        if len(self.x) != len(self.y):
+            raise DataMismatchError
 
-        # TODO Call the method split_set()
+        # TODO Comments
+        self.x = x
+        self.y = y
+
+        NNData.split_set(self)
         pass
 
     def split_set(self, new_train_percentage=None):
         # TODO Docs
 
-        # TODO reassign self.train_percentage if new_train_percentage is not
-        #  None. -> Use the limiter
+        # TODO Comments
+        if new_train_percentage is not None:
+            self.train_percentage = NNData.percentage_limiter(
+                new_train_percentage)
 
-        # TODO Calculate the size of the training set and testing set using
-        #  self.train_percentage and the size of the loaded data
+        train_size = (len(self.x) * (self.train_percentage * .01))
+        data_size = len(self.x)
 
-        # TODO populate train_indices and test_indices with appropriately
-        #  sized lists of indices to examine the data. The indices should be
-        #  assigned randomly
+        self.train_indices = random.sample(range(0, data_size), train_size)
+        self.test_indices = list(
+            set((range(0, data_size - set(self.train_indices)))))
 
-        # TODO Call method prime_data()
-        pass
+        NNData.prime_data(self)
 
     def prime_data(self, my_set=None, order=None):
         # TODO Docs
 
-        # TODO if order is None, set order = NNData.Order.SEQUENTIAL.
+        if order is None:
+            order = NNData.Order.SEQUENTIAL
+
+        # TODO Make this work
+        if my_set is NNData.Set.TEST:
+            self.test_pool = collections.deque()
+
+        # TODO Make this work
+        if my_set is NNData.Set.TRAIN:
+            self.train_pool = collections.deque()
 
         # TODO Copy test_indices to test_pool and train_indices to
         #  train_pool (or just one if my_set is specified as either Set.TEST
@@ -146,6 +148,7 @@ class NNData:
         #  returned should be a list of the form [x,y] where x is an example
         #  and y is the corresponding label (expected result)
         pass
+
     # Inner Order Class ------------------------------------------------------
     class Order(Enum):
         """Enum which determines whether the training data is presented in
@@ -200,13 +203,16 @@ def main():
         Y = ['A', 'B', 'C', 'D']
         our_char_data = NNData(X, Y, 50)
     except:
-        print("There are errors that likely come from __init__ or a method called by __init__")
+        print(
+            "There are errors that likely come from __init__ or a method called by __init__")
         errors = True
     try:
         our_data.split_set(30)
         assert len(our_data.train_indices) == 3
         assert len(our_data.test_indices) == 7
-        assert (list(set(our_data.train_indices + our_data.test_indices))) == list(range(10))
+        assert (list(
+            set(our_data.train_indices + our_data.test_indices))) == list(
+            range(10))
     except:
         print("There are errors that likely come from split_set")
         errors = True
@@ -245,14 +251,18 @@ def main():
         assert set(my_x_list) == set(X)
         assert set(my_y_list) == set(Y)
     except:
-        print("There are errors that may come from prime_data, but could be from another method")
+        print(
+            "There are errors that may come from prime_data, but could be from another method")
         errors = True
     if errors:
-        print("You have one or more errors.  Please fix them before submitting")
+        print(
+            "You have one or more errors.  Please fix them before submitting")
     else:
         print("No errors were identified by the unit test.")
         print("You should still double check that your code meets spec.")
-        print("You should also check that PyCharm does not identify any PEP-8 issues.")
+        print(
+            "You should also check that PyCharm does not identify any PEP-8 issues.")
+
 
 if __name__ == "__main__":
     main()
