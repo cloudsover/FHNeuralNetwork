@@ -1,15 +1,6 @@
 from enum import Enum, auto
 
 
-# -----------------------------------------------------------------------------
-# Name: NNData
-# Purpose: Foundation of larger Python Neural Network project. Efficiently
-# manages training and testing data given.
-#
-# Author: Benjamin Kaliczak
-# Date: 01/10/19
-# -----------------------------------------------------------------------------
-
 class NNData:
     """This class is the first part of an artificial neural network written
     in python. It takes in two parts of the same data set as well as a
@@ -17,8 +8,9 @@ class NNData:
 
 
     """
+    DEFAULT_PERCENTAGE = 100
 
-    def __init__(self, percentage: int = 100, x: list = None,
+    def __init__(self, percentage: int = DEFAULT_PERCENTAGE, x: list = None,
                  y: list = None):
         """
         Constructor Method
@@ -89,23 +81,27 @@ class NNData:
         """ Method-stub placeholder"""
         pass
 
+    # Inner Order Class ------------------------------------------------------
     class Order(Enum):
         """Enum which determines whether the training data is presented in
         the same order to the neural network each time, or in a random order
 
         Returns:
             RANDOM: Indicates that training data is presented in random order.
+
             SEQUENTIAL: Indicates that training data is presented in
             sequential order.
         """
         RANDOM = auto()
         SEQUENTIAL = auto()
 
+    # Inner Set Class ------------------------------------------------------
     class Set(Enum):
         """Enum which helps to identify whether we are requesting training
         set data or testing set data
         Returns:
             TRAIN: Identifies that training data is requested.
+
             TEST: Identifies that testing data is requested.
         """
         TRAIN = auto()
