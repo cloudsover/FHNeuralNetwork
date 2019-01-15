@@ -103,20 +103,29 @@ class NNData:
     def prime_data(self, my_set=None, order=None):
         # TODO Docs
 
+        self.test_pool = collections.deque()
+        self.train_pool = collections.deque()
         if order is None:
             order = NNData.Order.SEQUENTIAL
 
-        # TODO Make this work
+        # Only populate test set
         if my_set is NNData.Set.TEST:
-            self.test_pool = collections.deque()
+            for index in self.test_indices:
+                self.test_pool.append(self.test_indices[index])
 
-        # TODO Make this work
+        # Only populate train set
         if my_set is NNData.Set.TRAIN:
-            self.train_pool = collections.deque()
+            for index in self.train_indices:
+                self.train_pool.append(self.train_indices[index])
 
-        # TODO Make this work
+        # Populate test and train pools with the example values pointed to
+        # by the listed indices
         else:
-            self.test_pool = collections.deque()
+            for index in self.train_indices:
+                self.train_pool.append(self.train_indices[index])
+
+            for index in self.test_indices:
+                self.test_pool.append(self.test_indices[index])
 
             # TODO Make this work
         if order is NNData.Order.RANDOM:
