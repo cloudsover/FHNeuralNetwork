@@ -88,9 +88,12 @@ class NNData:
             self.train_percentage = NNData.percentage_limiter(
                 new_train_percentage)
 
+        # Setting lengths relative to the size of the data, and the
+        # percentage of data to use in testing
         train_size = (len(self.x) * (self.train_percentage * .01))
         data_size = len(self.x)
 
+        # Populating train and test indices which will point to example data
         self.train_indices = random.sample(range(0, data_size), train_size)
         self.test_indices = list(
             set((range(0, data_size - set(self.train_indices)))))
@@ -111,6 +114,13 @@ class NNData:
         if my_set is NNData.Set.TRAIN:
             self.train_pool = collections.deque()
 
+        # TODO Make this work
+        else:
+            self.test_pool = collections.deque()
+
+            # TODO Make this work
+        if order is NNData.Order.RANDOM:
+            pass
         # TODO Copy test_indices to test_pool and train_indices to
         #  train_pool (or just one if my_set is specified as either Set.TEST
         #  or Set.TRAIN) Both test pools should be dequeues. If
@@ -121,11 +131,11 @@ class NNData:
     def empty_pool(self, my_set=None):
         # TODO Docs
 
-        # TODO If my_set is None, set my_set = NNData.Set.TRAIN.
+        if my_set is None:
+            my_set = NNData.Set.TRAIN
 
-        # TODO Return True if the pool indicated by my_set is empty,
-        #  or False if not.
-        pass
+        # TODO True if pool poined to by my_set is empty
+        # TODO False if not empty
 
     def get_number_samples(self, my_set=None):
         # TODO Docs
