@@ -15,8 +15,10 @@ class NNData:
     """
     DEFAULT_PERCENTAGE = 100
 
-    def __init__(self, x: list = None,
-                 y: list = None, percentage: int = DEFAULT_PERCENTAGE):
+    def __init__(self,
+                 x: list = None,
+                 y: list = None,
+                 percentage: int = DEFAULT_PERCENTAGE):
         """
         Constructor Method
         Args:
@@ -33,18 +35,20 @@ class NNData:
         if y is None:
             y = []
 
-        self.x = None  # example part of data - list of lists
-        self.y = None  # label part of data - List of lists
-        self.train_indices = None  # List of pointers to training subset
-        self.train_pool = None  # dequeue containing examples not yet used
-        self.test_indices = None  # List of pointers for testing subset
-        self.test_pool = None  # dequeue containing examples not used in test
+        self.x: list = None  # example part of data - list of lists
+        self.y: list = None  # label part of data - List of lists
+        self.train_indices: list = None  # List of pointers to training subset
+        # self.train_pool: list = None  # dequeue containing examples not yet
+        # used
+        self.test_indices: list = None  # List of pointers for testing subset
+        self.test_pool: list = None  # dequeue containing examples not used in
+        # test
 
         # Filter given percentage data through mutator method
-        self.train_percentage = self.percentage_limiter(percentage)
+        self.train_percentage = NNData.percentage_limiter(percentage)
 
         # Initializes Data
-        self.load_data(self, x, y)
+        self.load_data(x, y)
 
     @staticmethod
     def percentage_limiter(percentage: int) -> int:
@@ -69,7 +73,7 @@ class NNData:
         else:
             return int(percentage)
 
-    def load_data(self, x: list, y: list):
+    def load_data(self, x, y):
         """ Checks that the lengths of x and y are the same. Calls the
         method split_set
 
@@ -79,14 +83,14 @@ class NNData:
         Raises:
             DataMismatchError: Raised if x and y are not the same length.
             """
-
-        if len(self.x) is not len(self.y):
-            raise DataMismatchError
+        if self.x and self.y is not None:
+            if len(self.x) != len(self.y):
+                raise DataMismatchError
         else:
             self.x = x
             self.y = y
 
-        NNData.split_set(self)
+        self.split_set()
 
     def split_set(self, new_train_percentage=None):
         """ Splits the data between the training and testing pools based on
@@ -102,7 +106,7 @@ class NNData:
         """
 
         if new_train_percentage is not None:
-            self.train_percentage = self.percentage_limiter(
+            self.train_percentage = NNData.percentage_limiter(
                 new_train_percentage)
 
         # Setting lengths relative to the size of the data, and the
@@ -112,7 +116,8 @@ class NNData:
                                                   0.01))))
 
         # Populating train and test indices which will point to example data
-        self.train_indices = random.sample(range(0, data_size), train_size)
+        self.train_indices = list(random.sample(range(0, data_size),
+                                                train_size))
         self.test_indices = list(
             set(range(0, data_size)) - set(self.train_indices))
 
@@ -339,3 +344,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+#
+# X = list(range(10))
+# Y = X
+# our_data = NNData(X, Y)
+# X = list(range(100))
+# Y = X
+# our_big_data = NNData(X, Y, 50)
+# Y = [1]
