@@ -86,6 +86,7 @@ class NNData:
         if self.x and self.y is not None:
             if len(self.x) != len(self.y):
                 raise DataMismatchError
+
         else:
             self.x = x
             self.y = y
@@ -141,25 +142,22 @@ class NNData:
             order = self.Order.SEQUENTIAL
 
         elif order is self.Order.RANDOM:
-            random.shuffle(test_indices_temp)
-            random.shuffle(train_indices_temp)
-
-        self.train_pool = collections.deque(train_indices_temp)
-        self.test_pool = collections.deque(test_indices_temp)
+            random.shuffle(self.test_indices_temp)
+            random.shuffle(self.train_indices_temp)
 
         # Only populate test set
         if my_set is self.Set.TEST:
-            self.test_pool = collections.deque(test_indices_temp)
+            self.test_pool = collections.deque(self.test_indices_temp)
 
         # Only populate train set
         elif my_set is self.Set.TRAIN:
-            self.train_pool = collections.deque(train_indices_temp)
+            self.train_pool = collections.deque(self.train_indices_temp)
 
         # Populate test and train pools with the example values pointed to
         # by the listed indices
         else:
-            self.train_pool = collections.deque(train_indices_temp)
-            self.test_pool = collections.deque(test_indices_temp)
+            self.train_pool = collections.deque(self.train_indices_temp)
+            self.test_pool = collections.deque(self.test_indices_temp)
 
     def empty_pool(self, my_set=None) -> bool:
         """ Checks to see if the specified set is empty, defaults to
@@ -176,11 +174,10 @@ class NNData:
         if my_set is self.Set.TRAIN:
             if len(self.train_pool) == 0:
                 return True
+            else:
+                return False
 
-        else:
-            return False
-
-        if len(self.test_pool) == 0:
+        elif len(self.test_pool) == 0:
             return True
         else:
             return False
@@ -216,11 +213,17 @@ class NNData:
 
         if my_set is self.Set.TRAIN:
             index = self.train_pool.popleft()
-            return list(self.x[index]) + self.y[index]
+            example = self.x[index]
+            label = self.y[index]
+            print(self.x, self.y)
+            ret_item = list(example, label)
+            return ret_item
+
         elif my_set is self.Set.TEST:
             if my_set is self.Set.TRAIN:
                 index = self.test_pool.popleft()
-                return list(self.x[index]) + self.y[index]
+                ret_item =  list(self.x[index]) + self.y[index]
+                return ret_item
 
     # Inner Order Class ------------------------------------------------------
     class Order(Enum):
@@ -267,7 +270,7 @@ def main():
         Y = [1]
         try:
             our_bad_data = NNData(X, Y)
-            raise Exception
+            # raise Exception -----------------------------------------------
         except DataMismatchError:
             pass
         except:
@@ -275,7 +278,6 @@ def main():
         X = ['a', 'b', 'c', 'd']
         Y = ['A', 'B', 'C', 'D']
         our_char_data = NNData(X, Y, 50)
-        print(our_char_data.y)
     except:
         print(
             "There are errors that likely come from __init__ or a method called by __init__")
@@ -304,6 +306,7 @@ def main():
         errors = True
 
     try:
+        errors = False
         our_data.prime_data(order=NNData.Order.SEQUENTIAL)
         my_x_list = []
         my_y_list = []
