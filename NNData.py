@@ -1,5 +1,7 @@
 import collections
 from enum import Enum, auto
+from typing import List, Any
+
 import numpy as np
 import random
 
@@ -31,18 +33,18 @@ class NNData:
         if y is None:
             y = []
 
-        self.x = x  # example part of data - list of lists
-        self.y = y  # label part of data - List of lists
+        self.x = None  # example part of data - list of lists
+        self.y = None  # label part of data - List of lists
         self.train_indices = None  # List of pointers to training subset
         self.train_pool = None  # dequeue containing examples not yet used
         self.test_indices = None  # List of pointers for testing subset
         self.test_pool = None  # dequeue containing examples not used in test
 
         # Filter given percentage data through mutator method
-        self.train_percentage = NNData.percentage_limiter(percentage)
+        self.train_percentage = self.percentage_limiter(percentage)
 
         # Initializes Data
-        NNData.load_data(self, x, y)
+        self.load_data(self, x, y)
 
     @staticmethod
     def percentage_limiter(percentage: int) -> int:
@@ -67,7 +69,7 @@ class NNData:
         else:
             return int(percentage)
 
-    def load_data(self, x, y):
+    def load_data(self, x: list, y: list):
         """ Checks that the lengths of x and y are the same. Calls the
         method split_set
 
@@ -78,7 +80,7 @@ class NNData:
             DataMismatchError: Raised if x and y are not the same length.
             """
 
-        if len(self.x) != len(self.y):
+        if len(self.x) is not len(self.y):
             raise DataMismatchError
         else:
             self.x = x
@@ -100,21 +102,21 @@ class NNData:
         """
 
         if new_train_percentage is not None:
-            self.train_percentage = NNData.percentage_limiter(
+            self.train_percentage = self.percentage_limiter(
                 new_train_percentage)
 
         # Setting lengths relative to the size of the data, and the
         # percentage of data to use in testing
-        train_size = (float(len(self.x)) * float((self.train_percentage *
-                                                  .01)))
-        data_size = len(self.x)
+        data_size = int(len(self.x))
+        train_size = int(float(data_size * float((self.train_percentage *
+                                                  0.01))))
 
         # Populating train and test indices which will point to example data
         self.train_indices = random.sample(range(0, data_size), train_size)
         self.test_indices = list(
             set(range(0, data_size)) - set(self.train_indices))
 
-        NNData.prime_data(self)
+        self.prime_data(self)
 
     def prime_data(self, my_set=None, order=None):
         """ Copies indices into desired pools for training and testing.
@@ -131,9 +133,9 @@ class NNData:
 
         # Default ordering of data
         if order is None:
-            order = NNData.Order.SEQUENTIAL
+            order = self.Order.SEQUENTIAL
 
-        elif order is NNData.Order.RANDOM:
+        elif order is self.Order.RANDOM:
             random.shuffle(test_indices_temp)
             random.shuffle(train_indices_temp)
 
@@ -141,12 +143,12 @@ class NNData:
         self.test_pool = collections.deque(test_indices_temp)
 
         # Only populate test set
-        if my_set is NNData.Set.TEST:
+        if my_set is self.Set.TEST:
             for index in test_indices_temp:
                 self.test_pool.append(index)
 
         # Only populate train set
-        elif my_set is NNData.Set.TRAIN:
+        elif my_set is self.Set.TRAIN:
             for index in train_indices_temp:
                 self.train_pool.append(index)
 
@@ -168,10 +170,10 @@ class NNData:
         """
 
         if my_set is None:
-            my_set = NNData.Set.TRAIN
+            my_set = self.Set.TRAIN
 
         # Testing if training pool is empty
-        if my_set is NNData.Set.TRAIN:
+        if my_set is self.Set.TRAIN:
             if len(self.train_pool) == 0:
                 return True
 
@@ -197,11 +199,11 @@ class NNData:
             return len(self.x)
 
         # Size of training set
-        if my_set is NNData.Set.TRAIN:
+        if my_set is self.Set.TRAIN:
             return len(self.train_indices)
 
         # Size of testing set
-        if my_set is NNData.Set.TEST:
+        if my_set is self.Set.TEST:
             return len(self.test_indices)
 
     def get_one_item(self, my_set=None) -> list:
@@ -210,13 +212,13 @@ class NNData:
         label.
         """
         if my_set is None:
-            my_set = NNData.Set.TRAIN
+            my_set = self.Set.TRAIN
 
-        if my_set is NNData.Set.TRAIN:
+        if my_set is self.Set.TRAIN:
             index = self.train_pool.popleft()
             return list(self.x[index]) + self.y[index]
-        elif my_set is NNData.Set.TEST:
-            if my_set is NNData.Set.TRAIN:
+        elif my_set is self.Set.TEST:
+            if my_set is self.Set.TRAIN:
                 index = self.test_pool.popleft()
                 return list(self.x[index]) + self.y[index]
 
@@ -261,7 +263,7 @@ def main():
         our_data = NNData(X, Y)
         X = list(range(100))
         Y = X
-        our_big_data = NNData(X, Y, percentage=50)
+        our_big_data = NNData(X, Y, 50)
         Y = [1]
         try:
             our_bad_data = NNData(X, Y)
@@ -337,10 +339,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-X = list(range(10))
-Y = X
-our_data = NNData(X, Y)
-X = list(range(100))
-Y = X
-our_big_data = NNData(X, Y, percentage=50)
-Y = [1]
