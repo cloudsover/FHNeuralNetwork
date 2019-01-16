@@ -1,5 +1,6 @@
 import collections
 from enum import Enum, auto
+import numpy as np
 import random
 
 
@@ -12,8 +13,8 @@ class NNData:
     """
     DEFAULT_PERCENTAGE = 100
 
-    def __init__(self, percentage: int = DEFAULT_PERCENTAGE, x: list = None,
-                 y: list = None):
+    def __init__(self, x: list = None,
+                 y: list = None, percentage: int = DEFAULT_PERCENTAGE):
         """
         Constructor Method
         Args:
@@ -30,12 +31,12 @@ class NNData:
         if y is None:
             y = []
 
-        self.x = x
-        self.y = y
-        self.train_indices = None
-        self.train_pool = None
-        self.test_indices = None
-        self.test_pool = None
+        self.x = x  # example part of data - list of lists
+        self.y = y  # label part of data - List of lists
+        self.train_indices = None  # List of pointers to training subset
+        self.train_pool = None  # dequeue containing examples not yet used
+        self.test_indices = None  # List of pointers for testing subset
+        self.test_pool = None  # dequeue containing examples not used in test
 
         # Filter given percentage data through mutator method
         self.train_percentage = NNData.percentage_limiter(percentage)
@@ -67,106 +68,157 @@ class NNData:
             return int(percentage)
 
     def load_data(self, x, y):
-        # TODO Docs
-        """ Method-stub placeholder"""
+        """ Checks that the lengths of x and y are the same. Calls the
+        method split_set
+
+        Args:
+            x: example part of data - list of lists
+            y: label part of data - List of lists
+        Raises:
+            DataMismatchError: Raised if x and y are not the same length.
+            """
 
         if len(self.x) != len(self.y):
             raise DataMismatchError
-
-        # TODO Comments
-        self.x = x
-        self.y = y
+        else:
+            self.x = x
+            self.y = y
 
         NNData.split_set(self)
-        pass
 
     def split_set(self, new_train_percentage=None):
-        # TODO Docs
+        """ Splits the data between the training and testing pools based on
+        the percentage given.
 
-        # TODO Comments
+        Populates train_indices and test_indices
+
+        Calls prime.data()
+
+        Args:
+            new_train_percentage: new percentage value to set
+            self.percentage to. Run through percentage_limiter()
+        """
+
         if new_train_percentage is not None:
             self.train_percentage = NNData.percentage_limiter(
                 new_train_percentage)
 
         # Setting lengths relative to the size of the data, and the
         # percentage of data to use in testing
-        train_size = (len(self.x) * (self.train_percentage * .01))
+        train_size = (float(len(self.x)) * float((self.train_percentage *
+                                                  .01)))
         data_size = len(self.x)
 
         # Populating train and test indices which will point to example data
         self.train_indices = random.sample(range(0, data_size), train_size)
         self.test_indices = list(
-            set((range(0, data_size - set(self.train_indices)))))
+            set(range(0, data_size)) - set(self.train_indices))
 
         NNData.prime_data(self)
 
     def prime_data(self, my_set=None, order=None):
-        # TODO Docs
+        """ Copies indices into desired pools for training and testing.
+        Default is both training and testing.
 
-        self.test_pool = collections.deque()
-        self.train_pool = collections.deque()
+        Args:
+            my_set: Specified if only one set is to be primed
+            order: Specified if specific ordering is desired. Defaults to
+            Sequential.
+        """
+
+        test_indices_temp = self.test_indices
+        train_indices_temp = self.train_indices
+
+        # Default ordering of data
         if order is None:
             order = NNData.Order.SEQUENTIAL
 
+        elif order is NNData.Order.RANDOM:
+            random.shuffle(test_indices_temp)
+            random.shuffle(train_indices_temp)
+
+        self.train_pool = collections.deque(train_indices_temp)
+        self.test_pool = collections.deque(test_indices_temp)
+
         # Only populate test set
         if my_set is NNData.Set.TEST:
-            for index in self.test_indices:
-                self.test_pool.append(self.test_indices[index])
+            for index in test_indices_temp:
+                self.test_pool.append(index)
 
         # Only populate train set
-        if my_set is NNData.Set.TRAIN:
-            for index in self.train_indices:
-                self.train_pool.append(self.train_indices[index])
+        elif my_set is NNData.Set.TRAIN:
+            for index in train_indices_temp:
+                self.train_pool.append(index)
 
         # Populate test and train pools with the example values pointed to
         # by the listed indices
         else:
-            for index in self.train_indices:
-                self.train_pool.append(self.train_indices[index])
+            for index in train_indices_temp:
+                self.train_pool.append(index)
 
-            for index in self.test_indices:
-                self.test_pool.append(self.test_indices[index])
+            for index in test_indices_temp:
+                self.test_pool.append(index)
 
-            # TODO Make this work
-        if order is NNData.Order.RANDOM:
-            pass
-        # TODO Copy test_indices to test_pool and train_indices to
-        #  train_pool (or just one if my_set is specified as either Set.TEST
-        #  or Set.TRAIN) Both test pools should be dequeues. If
-        #  order=Order.RANDOM, the indices should be randomized as they are
-        #  copied. Otherwise they should remain in their original order.
-        pass
+    def empty_pool(self, my_set=None) -> bool:
+        """ Checks to see if the specified set is empty, defaults to
+        training set.
 
-    def empty_pool(self, my_set=None):
-        # TODO Docs
+        Args:
+            my_set: Specific set to check if empty.
+        """
 
         if my_set is None:
             my_set = NNData.Set.TRAIN
 
-        # TODO True if pool poined to by my_set is empty
-        # TODO False if not empty
+        # Testing if training pool is empty
+        if my_set is NNData.Set.TRAIN:
+            if len(self.train_pool) == 0:
+                return True
 
-    def get_number_samples(self, my_set=None):
-        # TODO Docs
+        else:
+            return False
 
-        # TODO If my_set is None, return the total number of samples in the
-        #  dataset.
+        if len(self.test_pool) == 0:
+            return True
+        else:
+            return False
 
-        # TODO Otherwise, return the total number of samples in the set
-        #  requested (TEST or TRAIN)
+    def get_number_samples(self, my_set=None) -> int:
+        """Returns the number of samples in the data set requested. Defaults
+        to the entire set.
+        Args:
+            my_set: Specified data set. Either testing set or training set.
+        Returns:
+            Size of set as an int.
+            """
 
-        pass
+        # If not specified, returns the size of the entire set
+        if my_set is None:
+            return len(self.x)
 
-    def get_one_item(self, my_set=None):
-        # TODO Docs
+        # Size of training set
+        if my_set is NNData.Set.TRAIN:
+            return len(self.train_indices)
 
-        # TODO if my_set is None, set my_set = NNData.Set.Train.
+        # Size of testing set
+        if my_set is NNData.Set.TEST:
+            return len(self.test_indices)
 
-        # TODO popleft and return one item from the appropriate pool
-        #  dequeue, or None if the requested pool is empty. The item
-        #  returned should be a list of the form [x,y] where x is an example
-        #  and y is the corresponding label (expected result)
-        pass
+    def get_one_item(self, my_set=None) -> list:
+        """Pops one item from the indicated set and returns a list in the
+        form of [x,y] x being the example data, and y is the corresponding
+        label.
+        """
+        if my_set is None:
+            my_set = NNData.Set.TRAIN
+
+        if my_set is NNData.Set.TRAIN:
+            index = self.train_pool.popleft()
+            return list(self.x[index]) + self.y[index]
+        elif my_set is NNData.Set.TEST:
+            if my_set is NNData.Set.TRAIN:
+                index = self.test_pool.popleft()
+                return list(self.x[index]) + self.y[index]
 
     # Inner Order Class ------------------------------------------------------
     class Order(Enum):
@@ -209,7 +261,7 @@ def main():
         our_data = NNData(X, Y)
         X = list(range(100))
         Y = X
-        our_big_data = NNData(X, Y, 50)
+        our_big_data = NNData(X, Y, percentage=50)
         Y = [1]
         try:
             our_bad_data = NNData(X, Y)
@@ -285,3 +337,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+X = list(range(10))
+Y = X
+our_data = NNData(X, Y)
+X = list(range(100))
+Y = X
+our_big_data = NNData(X, Y, percentage=50)
+Y = [1]
