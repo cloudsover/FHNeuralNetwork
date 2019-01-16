@@ -1,6 +1,5 @@
 import collections
 from enum import Enum, auto
-from typing import List, Any
 
 import numpy as np
 import random
@@ -35,8 +34,8 @@ class NNData:
         if y is None:
             y = []
 
-        self.x: list = None  # example part of data - list of lists
-        self.y: list = None  # label part of data - List of lists
+        self.x: list = x  # example part of data - list of lists
+        self.y: list = y  # label part of data - List of lists
         self.train_indices: list = None  # List of pointers to training subset
         self.train_pool: list = None  # dequeue containing examples not yet
         # used
@@ -112,9 +111,10 @@ class NNData:
 
         # Setting lengths relative to the size of the data, and the
         # percentage of data to use in testing
-        data_size = int(len(self.x))
-        train_size = int(float(data_size * float((self.train_percentage *
-                                                  0.01))))
+        data_size = np.math.floor(len(self.x))
+        train_size = np.math.floor(float(data_size * float((
+                self.train_percentage *
+                0.01))))
 
         # Populating train and test indices which will point to example data
         self.train_indices = list(random.sample(range(0, data_size),
@@ -134,30 +134,30 @@ class NNData:
             Sequential.
         """
 
-        test_indices_temp = self.test_indices
-        train_indices_temp = self.train_indices
+        test_indices_temp = self.test_indices[:]
+        train_indices_temp = self.train_indices[:]
 
         # Default ordering of data
-        if order is None:
+        if order is None or order is self.Order.SEQUENTIAL:
             order = self.Order.SEQUENTIAL
 
         elif order is self.Order.RANDOM:
-            random.shuffle(self.test_indices_temp)
-            random.shuffle(self.train_indices_temp)
+            self.test_indices_temp = random.shuffle(test_indices_temp)
+            self.train_indices_temp = random.shuffle(train_indices_temp)
 
         # Only populate test set
         if my_set is self.Set.TEST:
-            self.test_pool = collections.deque(self.test_indices_temp)
+            self.test_pool = collections.deque(test_indices_temp)
 
         # Only populate train set
         elif my_set is self.Set.TRAIN:
-            self.train_pool = collections.deque(self.train_indices_temp)
+            self.train_pool = collections.deque(train_indices_temp)
 
         # Populate test and train pools with the example values pointed to
         # by the listed indices
         else:
-            self.train_pool = collections.deque(self.train_indices_temp)
-            self.test_pool = collections.deque(self.test_indices_temp)
+            self.train_pool = collections.deque(train_indices_temp)
+            self.test_pool = collections.deque(test_indices_temp)
 
     def empty_pool(self, my_set=None) -> bool:
         """ Checks to see if the specified set is empty, defaults to
@@ -208,22 +208,26 @@ class NNData:
         form of [x,y] x being the example data, and y is the corresponding
         label.
         """
+
+        # Set default set to train
         if my_set is None:
             my_set = self.Set.TRAIN
 
+        # Pop from train set
         if my_set is self.Set.TRAIN:
             index = self.train_pool.popleft()
             example = self.x[index]
             label = self.y[index]
-            print(self.x, self.y)
-            ret_item = list(example, label)
+            ret_item = [example, label]
             return ret_item
 
+        # Pop from test set
         elif my_set is self.Set.TEST:
-            if my_set is self.Set.TRAIN:
-                index = self.test_pool.popleft()
-                ret_item =  list(self.x[index]) + self.y[index]
-                return ret_item
+            index = self.test_pool.popleft()
+            example = self.x[index]
+            label = self.y[index]
+            ret_item = [example, label]
+            return ret_item
 
     # Inner Order Class ------------------------------------------------------
     class Order(Enum):
@@ -270,7 +274,7 @@ def main():
         Y = [1]
         try:
             our_bad_data = NNData(X, Y)
-            # raise Exception -----------------------------------------------
+            raise Exception
         except DataMismatchError:
             pass
         except:
@@ -306,7 +310,6 @@ def main():
         errors = True
 
     try:
-        errors = False
         our_data.prime_data(order=NNData.Order.SEQUENTIAL)
         my_x_list = []
         my_y_list = []
