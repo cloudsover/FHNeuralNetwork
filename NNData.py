@@ -38,7 +38,7 @@ class NNData:
         self.x: list = None  # example part of data - list of lists
         self.y: list = None  # label part of data - List of lists
         self.train_indices: list = None  # List of pointers to training subset
-        # self.train_pool: list = None  # dequeue containing examples not yet
+        self.train_pool: list = None  # dequeue containing examples not yet
         # used
         self.test_indices: list = None  # List of pointers for testing subset
         self.test_pool: list = None  # dequeue containing examples not used in
@@ -149,22 +149,17 @@ class NNData:
 
         # Only populate test set
         if my_set is self.Set.TEST:
-            for index in test_indices_temp:
-                self.test_pool.append(index)
+            self.test_pool = collections.deque(test_indices_temp)
 
         # Only populate train set
         elif my_set is self.Set.TRAIN:
-            for index in train_indices_temp:
-                self.train_pool.append(index)
+            self.train_pool = collections.deque(train_indices_temp)
 
         # Populate test and train pools with the example values pointed to
         # by the listed indices
         else:
-            for index in train_indices_temp:
-                self.train_pool.append(index)
-
-            for index in test_indices_temp:
-                self.test_pool.append(index)
+            self.train_pool = collections.deque(train_indices_temp)
+            self.test_pool = collections.deque(test_indices_temp)
 
     def empty_pool(self, my_set=None) -> bool:
         """ Checks to see if the specified set is empty, defaults to
@@ -280,6 +275,7 @@ def main():
         X = ['a', 'b', 'c', 'd']
         Y = ['A', 'B', 'C', 'D']
         our_char_data = NNData(X, Y, 50)
+        print(our_char_data.y)
     except:
         print(
             "There are errors that likely come from __init__ or a method called by __init__")
@@ -344,11 +340,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-#
-# X = list(range(10))
-# Y = X
-# our_data = NNData(X, Y)
-# X = list(range(100))
-# Y = X
-# our_big_data = NNData(X, Y, 50)
-# Y = [1]
