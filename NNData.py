@@ -142,8 +142,8 @@ class NNData:
             order = self.Order.SEQUENTIAL
 
         elif order is self.Order.RANDOM:
-            self.test_indices_temp = random.shuffle(test_indices_temp)
-            self.train_indices_temp = random.shuffle(train_indices_temp)
+            random.shuffle(test_indices_temp)
+            random.shuffle(train_indices_temp)
 
         # Only populate test set
         if my_set is self.Set.TEST:
