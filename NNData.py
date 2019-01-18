@@ -86,10 +86,6 @@ class NNData:
             if len(self.x) != len(self.y):
                 raise DataMismatchError
 
-        else:
-            self.x = x
-            self.y = y
-
         self.split_set()
 
     def split_set(self, new_train_percentage=None):
@@ -112,9 +108,7 @@ class NNData:
         # Setting lengths relative to the size of the data, and the
         # percentage of data to use in testing
         data_size = np.math.floor(len(self.x))
-        train_size = np.math.floor(float(data_size * float((
-                self.train_percentage *
-                0.01))))
+        train_size = np.math.floor(data_size * (self.train_percentage * 0.01))
 
         # Populating train and test indices which will point to example data
         self.train_indices = list(random.sample(range(0, data_size),
