@@ -102,7 +102,7 @@ class NNData:
         """
 
         if new_train_percentage is not None:
-            self.train_percentage = NNData.percentage_limiter(
+            self.train_percentage = self.percentage_limiter(
                 new_train_percentage)
 
         # Setting lengths relative to the size of the data, and the
