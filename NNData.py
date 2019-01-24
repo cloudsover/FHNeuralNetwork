@@ -86,10 +86,6 @@ class NNData:
             if len(self.x) != len(self.y):
                 raise DataMismatchError
 
-        else:
-            self.x = x
-            self.y = y
-
         self.split_set()
 
     def split_set(self, new_train_percentage=None):
@@ -106,15 +102,13 @@ class NNData:
         """
 
         if new_train_percentage is not None:
-            self.train_percentage = NNData.percentage_limiter(
+            self.train_percentage = self.percentage_limiter(
                 new_train_percentage)
 
         # Setting lengths relative to the size of the data, and the
         # percentage of data to use in testing
         data_size = np.math.floor(len(self.x))
-        train_size = np.math.floor(float(data_size * float((
-                self.train_percentage *
-                0.01))))
+        train_size = np.math.floor(data_size * (self.train_percentage * 0.01))
 
         # Populating train and test indices which will point to example data
         self.train_indices = list(random.sample(range(0, data_size),
@@ -142,8 +136,8 @@ class NNData:
             order = self.Order.SEQUENTIAL
 
         elif order is self.Order.RANDOM:
-            self.test_indices_temp = random.shuffle(test_indices_temp)
-            self.train_indices_temp = random.shuffle(train_indices_temp)
+            random.shuffle(test_indices_temp)
+            random.shuffle(train_indices_temp)
 
         # Only populate test set
         if my_set is self.Set.TEST:
