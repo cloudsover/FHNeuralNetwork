@@ -1,7 +1,8 @@
+from abc import *
 from enum import Enum, auto
 
 
-class MultiLinkNode:
+class MultiLinkNode(ABC):
     """TODO DOCS"""
 
     def __init__(self):
@@ -16,11 +17,13 @@ class MultiLinkNode:
         pass
 
     # fixme
+    @abstractmethod
     def process_new_input_node(self, node):
         """TODO Docs"""
         pass
 
     # fixme
+    @abstractmethod
     def process_new_output_node(self, node):
         """TODO DOCS"""
         pass
@@ -28,6 +31,7 @@ class MultiLinkNode:
     # fixme
     def clear_and_add_input_node(self, nodes):
         """TODO DOcs"""
+        # TODO Break this up with helper methods
         pass
 
 
@@ -40,11 +44,13 @@ class LayerType(Enum):
     OUTPUT = auto()
 
 # FIXME
-class Neurode:
+class Neurode(MultiLinkNode):
     """TODO DOCS"""
 
     def __init__(self, my_type):
         """TODO DOCS"""
-        pass
+        super().__init__()
+        # TODO value
+        # TODO my_type
 
     pass
