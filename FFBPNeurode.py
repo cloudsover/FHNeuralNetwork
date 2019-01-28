@@ -11,7 +11,7 @@ class FFBPNeurode(Neurode):
         super().__init__()
 
     @staticmethod
-    def activate_sigmoid(value):
+    def activate_sigmoid(value) -> float:
         """
         Sigmoid function which calculates the weighted sum of the input
         values and limits the results to a value between -1 and 1
@@ -26,33 +26,27 @@ class FFBPNeurode(Neurode):
     def receive_input(self, from_node=None, input_value=0):
         """TODO Docs"""
 
-        # TODO fix this
+        # If Neurode type is Input
         if self.my_type is LayerType.INPUT:
-            pass
+            self.value = input_value
+            [self.receive_input(neurode) for neurode in self.output_nodes]
 
         # TODO fix this
-        if self.my_type is LayerType.OUTPUT:
-            pass
+        # If Neurode type is Output
+        elif self.my_type is LayerType.OUTPUT or LayerType.HIDDEN:
+            if self.register_input(from_node):
+                self.fire()
 
-        # TODO fix this
-        if self.my_type is LayerType.HIDDEN:
-            pass
-
-        pass
-
-    def register_input(self, from_node):
+    def register_input(self, from_node) -> bool:
         """TODO Docs"""
 
-        # TODO Update binary encoding reporting_inputs
-        #      Use the index of from_node in input_nodes
-        #      to determine which bit position to change to 1
+        index = list(self.input_nodes.keys()).index(from_node)
+        self.reporting_inputs = self.reporting_inputs | 2 ** index
 
-        # TODO Check if all inputs are reporting ( use the ref value )
-
-        # TODO If all inputs are reporting, reset reporting_inputs to 0 and
-        #  return true. Else return False
-
-        pass
+        if self.reporting_inputs == self.compare_inputs_full:
+            return True
+        else:
+            return False
 
     def fire(self):
         """TODO Docs"""
