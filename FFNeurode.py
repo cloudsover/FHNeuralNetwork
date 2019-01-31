@@ -1,6 +1,6 @@
+from math import e
 from LayerType import LayerType
 from Neurode import Neurode
-from math import e
 
 
 class FFNeurode(Neurode):
@@ -29,7 +29,7 @@ class FFNeurode(Neurode):
         """
         return 1 / (1 + e ** (-value))
 
-    def receive_input(self, from_node=None, input_value=0):
+    def receive_input(self, from_node: Neurode = None, input_value: float = 0):
         """
         Input processing method which has different functionality
         depending on the classification of the Neurode.
@@ -56,15 +56,15 @@ class FFNeurode(Neurode):
         # If Neurode type is Input type
         if self.my_type is LayerType.INPUT:
             self.value = input_value
-            [self.receive_input(neurode) for neurode in self.output_nodes]
+            for neurode in self.output_nodes:
+                self.receive_input(neurode)
 
-        # TODO fix this
-        # If Neurode type is Output or Hidden type
+                # If Neurode type is Output or Hidden type
         elif self.my_type is LayerType.OUTPUT or LayerType.HIDDEN:
             if self.register_input(from_node):
                 self.fire()
 
-    def register_input(self, from_node) -> bool:
+    def register_input(self, from_node: Neurode) -> bool:
         """
         This method updates the binary encoding and checks if all inputs are
         reporting.
@@ -88,24 +88,29 @@ class FFNeurode(Neurode):
         self.reporting_inputs = self.reporting_inputs | 2 ** index
 
         if self.reporting_inputs == self.compare_inputs_full:
+            self.reporting_inputs = 0
             return True
-        else:
-            return False
+        return False
 
     def fire(self):
         """
         This method calculates and reports the value of the neurode based on
         the values of the input connections.
 
-        TODO detail steps.
+        Calculates the weighted sum of values from connected input nodes
+        and their weights using the activate_sigmoid() function.
+
         After calculating the value of the neurode, this method reports to
         all output connected neurodes letting them known that this neurode
         has a value ready.
         """
 
-        # TODO Calculate the value of the neurode based on the values of
-        #  input connections, and let all the output connection neurodes
-        #  know that our neurode has a value ready
-        pass
+        weighted_sum = 0
 
-    pass
+        for index, neurode in enumerate(self.input_nodes):
+            weighted_sum += neurode.get_value() * self.input_nodes.get(index)
+        self.value = self.activate_sigmoid(weighted_sum)
+
+        # Pass values to output nodes
+        for node in self.output_nodes:
+            node.receive_input(self)

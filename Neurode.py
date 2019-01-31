@@ -27,7 +27,7 @@ class Neurode(MultiLinkNode):
         self.value = None  # current value of the Neurode
         self.my_type = my_type  # LayerType values: input, hidden, or output
 
-    def get_value(self):
+    def get_value(self) -> float:
         """
         Getter method for value attribute
 
@@ -37,7 +37,7 @@ class Neurode(MultiLinkNode):
         """
         return self.value
 
-    def get_type(self):
+    def get_type(self) -> Enum:
         """
         Getter method for my_type attribute
 
@@ -46,7 +46,7 @@ class Neurode(MultiLinkNode):
         """
         return self.my_type
 
-    def process_new_input_node(self, node):
+    def process_new_input_node(self, node: MultiLinkNode):
         """
         Method which processes a node to be added to input connections
 
@@ -59,7 +59,7 @@ class Neurode(MultiLinkNode):
         weight = random.uniform(0, 1)
         self.input_nodes[node] = weight
 
-    def process_new_output_node(self, node):
+    def process_new_output_node(self, node: MultiLinkNode):
         """
         Method which processes a node to be added to output connections
 
