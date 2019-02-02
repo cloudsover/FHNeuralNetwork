@@ -1,4 +1,5 @@
 from math import e
+import numpy as np
 from LayerType import LayerType
 from Neurode import Neurode
 
@@ -114,3 +115,42 @@ class FFNeurode(Neurode):
         # Pass values to output nodes
         for node in self.output_nodes:
             node.receive_input(self.value)
+
+
+def main():
+    inodes = []
+    hnodes = []
+    onodes = []
+    for k in range(2):
+        inodes.append(FFNeurode(LayerType.INPUT))
+    for k in range(2):
+        hnodes.append(FFNeurode(LayerType.HIDDEN))
+    onodes.append(FFNeurode(LayerType.OUTPUT))
+    for node in inodes:
+        node.clear_and_add_output_nodes(hnodes)
+    for node in hnodes:
+        node.clear_and_add_input_nodes(inodes)
+        node.clear_and_add_output_nodes(onodes)
+    for node in onodes:
+        node.clear_and_add_input_nodes(hnodes)
+    try:
+        inodes[0].receive_input(None, 0)
+        assert onodes[0].get_value() == 0
+    except:
+        print("Error: Neurodes may be firing before receiving all input")
+    inodes[1].receive_input(None, 1)
+
+    value_0 = (1 / (1 + np.exp(-hnodes[0].input_nodes[inodes[1]])))
+    value_1 = (1 / (1 + np.exp(-hnodes[1].input_nodes[inodes[1]])))
+    inter = onodes[0].input_nodes[hnodes[0]] * value_0 + onodes[0].input_nodes[
+        hnodes[1]] * value_1
+    final = (1 / (1 + np.exp(-inter)))
+    try:
+        assert final == onodes[0].get_value()
+        assert 0 < final < 1
+    except:
+        print("Error: Calculation of neurode value may be incorrect")
+
+
+if __name__ == "__main__":
+    main()
