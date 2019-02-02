@@ -12,9 +12,9 @@ class FFNeurode(Neurode):
     - 'fires' when appropriate, passing data to the output side.
     """
 
-    def __init__(self):
+    def __init__(self, my_type: LayerType = LayerType.INPUT):
         """Init method which initializes the FFNeurode class"""
-        super().__init__()
+        super().__init__(my_type)
 
     @staticmethod
     def activate_sigmoid(value) -> float:
@@ -113,4 +113,4 @@ class FFNeurode(Neurode):
 
         # Pass values to output nodes
         for node in self.output_nodes:
-            node.receive_input(self)
+            node.receive_input(node)
