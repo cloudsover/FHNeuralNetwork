@@ -113,4 +113,4 @@ class FFNeurode(Neurode):
 
         # Pass values to output nodes
         for node in self.output_nodes:
-            node.receive_input(node)
+            node.receive_input(self.value)
