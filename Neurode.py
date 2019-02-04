@@ -15,7 +15,7 @@ class Neurode(MultiLinkNode):
 
     """
 
-    def __init__(self, my_type: Enum = LayerType.INPUT):
+    def __init__(self, my_type: LayerType = LayerType.INPUT):
         """
         Inits Neurode with all class and inherited attributes initialized
 
@@ -24,7 +24,7 @@ class Neurode(MultiLinkNode):
             neurode will be part of
         """
         super().__init__()
-        self.value = None  # current value of the Neurode
+        self.value = 0  # current value of the Neurode
         self.my_type = my_type  # LayerType values: input, hidden, or output
 
     def get_value(self) -> float:

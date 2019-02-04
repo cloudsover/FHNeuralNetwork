@@ -9,6 +9,6 @@ class LayerType(Enum):
     HIDDEN = Hidden node/layer
     OUTPUT = Output node/layer
     """
-    INPUT = auto
-    HIDDEN = auto
-    OUTPUT = auto
+    INPUT = 1
+    HIDDEN = 2
+    OUTPUT = 3

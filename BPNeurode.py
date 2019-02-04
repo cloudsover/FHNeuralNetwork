@@ -6,14 +6,14 @@ class BPNeurode(Neurode):
     """
     This class extends the functionality of the Neurode class.
 
-    TODO
+    - Adds back-propagation functionality
 
     Attributes:
-        delta: TODO
-        learning_rate:TODO
+        delta: measure of how incoming weights need to change
+        learning_rate: learning rate of the network
     """
 
-    def __init__(self, my_type=LayerType.INPUT):
+    def __init__(self, my_type: LayerType = LayerType.INPUT):
         """
         Inits BPNeurode with all class and inherited attributes initialized.
 
@@ -47,12 +47,9 @@ class BPNeurode(Neurode):
                       calculate their deltas.  It will then calculate it's own
                       delta, update incoming weights and "back_fire".
 
-        TODO
-        Output Layer: Signals will come with from_node=None, and expected
-                      set to the correct label for the training example just
-                      presented.  receive_back_input() will then calculate
-                      the delta, "back_fire" to the neurodes in the last
-                      hidden layer, and update the incoming weights.
+        Output Layer: Receive_back_input() will calculate the delta,
+                      "back_fire" to the neurodes in the last hidden layer,
+                      and update the incoming weights.
 
         Args:
             from_node: node to collect input from
@@ -62,22 +59,22 @@ class BPNeurode(Neurode):
         """
 
         # Output Layer Node
-        if from_node.my_type is LayerType.OUTPUT:
+        if self is LayerType.OUTPUT:
             self.calculate_delta(expected)
             self.back_fire()
             self.update_weights()
 
         # Hidden Layer Node
-        if from_node.my_type is LayerType.HIDDEN:
-            for node in from_node.my_type.output_nodes:
-                node.delta = node.calculate_delta()
+        if self is LayerType.HIDDEN:
+            for node in self.output_nodes:
+                node.calculate_delta()
 
             self.calculate_delta()
             self.update_weights()
             self.back_fire()
 
         # Input Layer Node
-        if from_node.my_type is LayerType.INPUT:
+        if self.my_type is LayerType.INPUT:
             pass
 
     def register_back_input(self, from_node) -> bool:
@@ -94,14 +91,14 @@ class BPNeurode(Neurode):
 
         """
 
-        if from_node.my_type is LayerType.OUTPUT:
+        if self.my_type is LayerType.OUTPUT:
             return True
 
-        index = list(self.input_nodes.keys()).index(from_node)
-        self.reporting_inputs = self.reporting_inputs | 2 ** index
+        index = list(self.output_nodes.keys()).index(from_node)
+        self.reporting_outputs = self.reporting_outputs | 2 ** index
 
-        if self.reporting_inputs == self.compare_inputs_full:
-            self.reporting_inputs = 0
+        if self.reporting_outputs == self.compare_outputs_full:
+            self.reporting_outputs = 0
             return True
         return False
 
@@ -116,30 +113,28 @@ class BPNeurode(Neurode):
 
         Hidden Layer Node:
          weighted deltas = sum(weight of self node logged by target node *
-                           delta of target node)
-         delta for hidden neurode = (sum of weighted deltas) *
-                                     sigmoid_derivative
+                           delta of target node) delta for hidden neurode =
+                           (sum of weighted deltas) * sigmoid_derivative
 
-        TODO
         Input Layer Node:
+        No action taken.
 
         Args:
             expected: expected value
         """
 
         # Output Node
-        if self.my_type is LayerType.OUTPUT:
+        if self.my_type == LayerType.OUTPUT:
             self.delta = (expected - self.value) * self.sigmoid_derivative(
                 self.value)
 
         # Hidden Node
         sum_of_deltas = 0
-        if self.my_type is LayerType.HIDDEN:
+        if self.my_type == LayerType.HIDDEN:
             for node in self.output_nodes:
                 sum_of_deltas += (node.input_nodes[self] * node.delta)
 
             self.delta = sum_of_deltas * self.sigmoid_derivative(self.value)
-        pass
 
     def update_weights(self):
         """
@@ -151,12 +146,10 @@ class BPNeurode(Neurode):
             our neurode's delta *
             learning rate)
         """
-
-        for node in self.input_nodes:
-            new_weight = self.input_nodes[node] + \
-                         (node.value *
-                          self.calculate_delta() *
-                          self.learning_rate)
+        new_weight = 0
+        for index, node in enumerate(self.input_nodes):
+            new_weight = self.input_nodes[node]
+            new_weight += node.value * self.delta * self.learning_rate
 
             self.input_nodes[node] = new_weight
 
