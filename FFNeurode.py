@@ -60,7 +60,7 @@ class FFNeurode(Neurode):
             for neurode in self.output_nodes:
                 self.receive_input(neurode)
 
-                # If Neurode type is Output or Hidden type
+        # If Neurode type is Output or Hidden type
         elif self.my_type is LayerType.OUTPUT or LayerType.HIDDEN:
             if self.register_input(from_node):
                 self.fire()
@@ -85,7 +85,7 @@ class FFNeurode(Neurode):
             not.
         """
 
-        index = list(self.input_nodes.keys()).index(from_node)
+        index = tuple(self.input_nodes.keys()).index(from_node)
         self.reporting_inputs = self.reporting_inputs | 2 ** index
 
         if self.reporting_inputs == self.compare_inputs_full:

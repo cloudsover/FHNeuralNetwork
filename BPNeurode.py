@@ -38,7 +38,6 @@ class BPNeurode(Neurode):
         """
         return value * (1 - value)
 
-    # TODO from_node
     def receive_back_input(self, from_node, expected: float = 0):
         """
         This function collects inputs from connected neurodes
@@ -60,19 +59,25 @@ class BPNeurode(Neurode):
         """
 
         # Output Layer Node
-        if self is LayerType.OUTPUT:
+        if self.my_type is LayerType.OUTPUT:
+            self.register_back_input(from_node)
             self.calculate_delta(expected)
             self.back_fire()
             self.update_weights()
 
         # Hidden Layer Node
-        if self is LayerType.HIDDEN:
+        if self.my_type is LayerType.HIDDEN:
+            self.register_back_input(from_node)
             for node in self.output_nodes:
                 node.calculate_delta()
-
             self.calculate_delta()
             self.update_weights()
             self.back_fire()
+
+        # # If Neurode type is Input type
+        # if self.my_type is LayerType.INPUT:
+        #     for neurode in self.output_nodes:
+        #         self.receive_back_input(neurode)
 
     def register_back_input(self, from_node) -> bool:
         """
@@ -144,14 +149,15 @@ class BPNeurode(Neurode):
             learning rate)
         """
 
-        for index, node in enumerate(self.input_nodes):
+        for node in self.input_nodes:
             new_weight = self.input_nodes[node]
             new_weight += node.value * self.delta * self.learning_rate
 
             self.input_nodes[node] = new_weight
 
     def back_fire(self):
-        """TODO Docs"""
+        """Recursive method which calls receive_back_input on each neurode
+        connected to it's input_nodes dict."""
 
         for node in self.input_nodes:
             if node.my_type is not LayerType.INPUT:
