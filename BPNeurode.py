@@ -38,6 +38,7 @@ class BPNeurode(Neurode):
         """
         return value * (1 - value)
 
+    # TODO from_node
     def receive_back_input(self, from_node, expected: float = 0):
         """
         This function collects inputs from connected neurodes
@@ -72,10 +73,6 @@ class BPNeurode(Neurode):
             self.calculate_delta()
             self.update_weights()
             self.back_fire()
-
-        # Input Layer Node
-        if self.my_type is LayerType.INPUT:
-            pass
 
     def register_back_input(self, from_node) -> bool:
         """
@@ -146,7 +143,7 @@ class BPNeurode(Neurode):
             our neurode's delta *
             learning rate)
         """
-        new_weight = 0
+
         for index, node in enumerate(self.input_nodes):
             new_weight = self.input_nodes[node]
             new_weight += node.value * self.delta * self.learning_rate

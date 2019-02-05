@@ -4,10 +4,19 @@ from LayerType import LayerType
 
 
 class FFBPNeurode(BPNeurode, FFNeurode):
-    """TODO Docs"""
+    """
+    FFBNPNeurode merges the functionality of both the BPNeurode and the
+    FFNeurode.
+    """
 
     def __init__(self, my_type: LayerType = LayerType.INPUT):
-        """TODO Docs"""
+        """
+        Inits FFBPNeurode with all inherited attributes initialized
+
+        Args:
+            my_type: LayerType enum. Determines the layer classification of
+            the neurode.
+        """
         super().__init__(my_type)
 
 
