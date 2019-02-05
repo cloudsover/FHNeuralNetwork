@@ -159,6 +159,6 @@ class BPNeurode(Neurode):
         """Recursive method which calls receive_back_input on each neurode
         connected to it's input_nodes dict."""
 
-        for node in self.input_nodes:
+        for node in self.output_nodes:
             if node.my_type is not LayerType.INPUT:
                 node.receive_back_input(self)
