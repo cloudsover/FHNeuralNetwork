@@ -26,4 +26,3 @@ class DLLNode:
     def get_prev(self):
         """TODO Docs"""
         return self.prev
-
