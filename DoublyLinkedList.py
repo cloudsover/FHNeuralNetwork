@@ -7,9 +7,9 @@ class DoublyLinkedList:
     def __init__(self, data=None):
         """TODO Docs"""
         self.data = data
-        self.current = None
-        self.head = None
-        self.tail = None
+        self.current: DLLNode = None
+        self.head: DLLNode = None
+        self.tail: DLLNode = None
 
     def __str__(self):
         """TODO Docs"""
@@ -47,78 +47,6 @@ class DoublyLinkedList:
         self.current = self.head
         return self.current
 
-    def is_empty(self):
-        """TODO Docs"""
-        return self.head.get_next() is None
-
-    def add_to_head(self, node):
-        """TODO Docs"""
-        if self.head is None:
-            self.head = self.tail = node
-
-        temp_node = self.head
-        node.set_next(temp_node)
-        temp_node.set_prev(node)
-        self.head = node
-
-    def add_to_tail(self, input_node):
-        """TODO Docs"""
-        if self.head is None:
-            self.tail = self.head = input_node
-
-        for node in self:
-            first_node = node.get_next()
-
-            if first_node is None:
-                node.set_next(input_node)
-                input_node.set_prev(node)
-                return
-
-    def remove_from_head(self):
-        """TODO Docs"""
-        if self.head is None:
-            return
-
-        node = self.head
-        next_node = node.get_next()
-        next_node.set_prev(None)
-        self.head = next_node
-
-        return node
-
-    def remove_from_tail(self):
-        """TODO Docs"""
-        if self.tail is None:
-            return
-
-        ret_node = self.tail
-
-        for node in self:
-            next_node = node.get_next()
-            prev_node = node.get_prev()
-
-            if next_node is None:
-                prev_node.set_next(None)
-                break
-
-        return ret_node
-
-    def insert_after_cur(self, node):
-        """TODO Docs"""
-        if self.current:
-            node.set_next(self.current.get_next())
-            self.current.set_next(node)
-            return True
-        else:
-            return False
-
-    def remove_after_cur(self):
-        """TODO Docs"""
-        if not self.current or self.current.get_next():
-            return False
-        else:
-            self.current.set_next(self.current.get_next().get_next())
-
     def iterate(self):
         """TODO Docs"""
         self.current = self.current.get_next()
@@ -128,6 +56,43 @@ class DoublyLinkedList:
         """TODO Docs"""
         self.current = self.current.get_prev()
         return self.current
+
+    def add_to_head(self, new_node):
+        """TODO Docs"""
+        if self.head is None:
+            self.head = new_node = self.tail
+
+        elif isinstance(new_node, DLLNode):
+            new_node.set_next(self.head)
+            self.head.next.set_prev(self.head)
+            self.head = new_node
+
+    def remove_from_head(self):
+        """TODO Docs"""
+        ret_node = self.head
+        if ret_node:
+            temp_node = ret_node.next.get_next()
+            self.head = ret_node.get_next()
+            self.head.set_prev(temp_node)
+        ret_node.set_next(None)
+
+    def insert_after_cur(self, new_node):
+        """TODO Docs"""
+        if isinstance(new_node, DLLNode) and self.current:
+            new_node.set_next(self.current.get_next())
+            if new_node is not self.head:
+                self.current.next.set_prev(new_node)
+            self.current.set_next(new_node)
+            return True
+        else:
+            return False
+
+    def remove_after_cur(self):
+        if not self.current or self.current.get_next():
+            return False
+        else:
+            return True
+
 
 
 def main():
