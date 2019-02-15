@@ -56,7 +56,7 @@ class Neurode(MultiLinkNode):
         Args:
             node: given node
         """
-        weight = random.uniform(0, 1)
+        weight = random.random()
         self.input_nodes[node] = weight
 
     def process_new_output_node(self, node: MultiLinkNode):

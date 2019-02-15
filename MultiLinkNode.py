@@ -47,6 +47,9 @@ class MultiLinkNode(ABC):
         self.input_nodes: OrderedDict = OrderedDict()  # Ordered Dictionary
         self.output_nodes: OrderedDict = OrderedDict()  # Ordered Dictionary
 
+    def __str__(self):
+        pass
+
     @abstractmethod
     def process_new_input_node(self, node):
         """
@@ -80,17 +83,10 @@ class MultiLinkNode(ABC):
             nodes: list of nodes to be added
         """
 
-        self.input_nodes.clear()
-        self.input_connections = 0
-        self.reporting_inputs = 0
+        self.clear_inputs()
 
-        for index, node in enumerate(nodes):
-            self.input_nodes[nodes[index]] = None
-            self.process_new_input_node(nodes[index])
-            self.input_connections += 1
-            # self.reporting_inputs = self.reporting_inputs | 2 ** node
-            self.compare_inputs_full = \
-                self.compare_inputs_full | 2 ** index
+        for node in nodes:
+            self.add_input_node(node)
 
     def clear_and_add_output_nodes(self, nodes: list):
         """
@@ -107,17 +103,32 @@ class MultiLinkNode(ABC):
             nodes: list of nodes to be added
             """
 
-        self.output_nodes.clear()
-        self.output_connections = 0
-        self.reporting_outputs = 0
+        self.clear_outputs()
 
-        for index, node in enumerate(nodes):
-            self.output_nodes[nodes[index]] = None
-            self.process_new_output_node(nodes[index])
-            self.output_connections += 1
-            # self.reporting_outputs = self.reporting_outputs | 2 ** node
-            self.compare_outputs_full = \
-                self.compare_outputs_full | 2 ** index
+        for node in nodes:
+            self.add_output_node(node)
+
+    def add_input_node(self, node):
+        self.input_nodes[node] = None
+        self.process_new_input_node(node)
+        self.input_connections += 1
+        self.compare_inputs_full = 2 ** self.input_connections - 1
+
+    def add_output_node(self, node):
+        self.output_nodes[node] = None
+        self.process_new_output_node(node)
+        self.output_connections += 1
+        self.compare_outputs_full = 2 ** self.output_connections - 1
+
+    def clear_outputs(self):
+        self.output_nodes = OrderedDict()
+        self.output_connections = 0
+        self.compare_outputs_full = 0
+
+    def clear_inputs(self):
+        self.input_nodes = OrderedDict()
+        self.input_connections = 0
+        self.compare_inputs_full = 0
 
 
 def main():
