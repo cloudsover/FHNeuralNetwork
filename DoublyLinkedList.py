@@ -2,97 +2,139 @@ from DLLNode import DLLNode
 
 
 class DoublyLinkedList:
-    """TODO Docs"""
+    """
+    Doubly-Linked List Data Type
 
-    def __init__(self, data=None):
-        """TODO Docs"""
-        self.data = data
+    Attributes:
+        current: 'pointer' node
+        head: node at the 'top' of the list
+        tail: node at the 'bottom' of the list
+    """
+
+    def __init__(self):
+        """Inits DoublyLinkedList with all class attributes initialized."""
         self.current: DLLNode = None
         self.head: DLLNode = None
         self.tail: DLLNode = None
 
     def __str__(self):
-        """TODO Docs"""
-        ret_string = []
-
-        for node in self:
-            ret_string.append(node)
-            return "->".join(ret_string)
-
-    def __iter__(self):
-        """TODO Docs"""
-        node = self.head
-
-        while node:
-            yield node
-            node = node.get_next()
-
-    def __contains__(self, item):
-        """TODO Docs"""
-
-        for node in self.__iter__():
-            if node == item:
-                return True
-        return False
-
-    def __len__(self):
-        _len = 0
-
-        for node in self.__iter__():
-            _len += 1
-        return _len
-
-    def reset_cur(self):
-        """TODO Docs"""
-        self.current = self.head
-        return self.current
+        """Stringizer"""
+        pass
 
     def iterate(self):
-        """TODO Docs"""
+        """
+        Iterator method which moves towards the bottom of the list one node
+        at a time.
+
+        Returns:
+            current pointer node.
+        """
         self.current = self.current.get_next()
         return self.current
 
     def rev_iterate(self):
-        """TODO Docs"""
+        """
+        Iterator method which moves towards the top of the list one node
+        at a time.
+
+        Returns:
+            current pointer node.
+        """
         self.current = self.current.get_prev()
         return self.current
 
-    def add_to_head(self, new_node):
-        """TODO Docs"""
-        if self.head is None:
-            self.head = new_node = self.tail
+    def reset_cur(self):
+        """
+        Method which resets the current pointer node to point at the
+        head of the list
 
-        elif isinstance(new_node, DLLNode):
+        Returns:
+            current pointer node
+        """
+        self.current = self.head
+        return self.current
+
+    def is_empty(self):
+        return self.head.get_next() is None
+
+    def add_to_head(self, new_node):
+        """
+        Inserts a new node at the head of the list.
+
+        Args:
+            new_node: node to add to list
+        """
+        if self.head is None:
+            self.head = self.tail = new_node
+            self.current = self.head
+            self.head.set_prev(None)
+            self.tail.set_next(None)
+        else:
+            self.head.set_prev(new_node)
             new_node.set_next(self.head)
-            self.head.next.set_prev(self.head)
             self.head = new_node
 
     def remove_from_head(self):
-        """TODO Docs"""
+        """
+        Removes a node from the head of the list.
+
+        Returns:
+            node removed
+        """
+        if self.head is self.tail:
+            ret_node = self.head
+            self.head = None
+            self.tail = None
+            return ret_node
+
         ret_node = self.head
         if ret_node:
-            temp_node = ret_node.next.get_next()
             self.head = ret_node.get_next()
-            self.head.set_prev(temp_node)
+            self.head.set_prev(None)
         ret_node.set_next(None)
+        if self.head is None:
+            self.tail = None
+        return ret_node
 
     def insert_after_cur(self, new_node):
-        """TODO Docs"""
-        if isinstance(new_node, DLLNode) and self.current:
+        """
+        Inserts a node after the current pointer node.
+
+        Args:
+            new_node: node to add
+
+        """
+        if self.current is self.tail:
+            new_node.set_prev(self.tail.get_prev())
+            self.tail = new_node
+            self.current.set_next(self.tail)
+            self.tail.set_prev(self.current)
+
+        else:
+            self.current.get_next().set_prev(new_node)
             new_node.set_next(self.current.get_next())
-            if new_node is not self.head:
-                self.current.next.set_prev(new_node)
+            new_node.set_prev(self.current)
             self.current.set_next(new_node)
+
+    def remove_after_cur(self) -> bool:
+        """
+        Removes the node after teh current pointer node.
+
+        Returns:
+            true if successful, false if not.
+        """
+        if self.current.get_next() is self.tail:
+            self.tail = self.current
+            self.current.set_next(None)
+            self.tail.set_next(None)
             return True
-        else:
+
+        if not self.current or not self.current.get_next():
             return False
 
-    def remove_after_cur(self):
-        if not self.current or self.current.get_next():
-            return False
-        else:
-            return True
-
+        self.current.set_next(self.current.get_next().get_next())
+        self.current.next.next.set_prev(self.current)
+        return True
 
 
 def main():
