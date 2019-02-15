@@ -48,7 +48,15 @@ class MultiLinkNode(ABC):
         self.output_nodes: OrderedDict = OrderedDict()  # Ordered Dictionary
 
     def __str__(self):
-        pass
+        """Stringizer"""
+        ret_str = "-->Node " + str(id(self)) + "\n"
+        ret_str = ret_str + "   Input Nodes:\n"
+        for key in self.input_nodes:
+            ret_str = ret_str + "   " + str(id(key)) + "\n"
+        ret_str = ret_str + "   Output Nodes\n"
+        for key in self.output_nodes:
+            ret_str = ret_str + "   " + str(id(key)) + "\n"
+        return ret_str
 
     @abstractmethod
     def process_new_input_node(self, node):
