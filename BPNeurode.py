@@ -56,22 +56,27 @@ class BPNeurode(Neurode):
             expected: expected value of node
 
         """
-
-        # Output Layer Node
-        if self.my_type is LayerType.OUTPUT:
-            self.register_back_input(from_node)
+        if self.register_back_input(from_node):
             self.calculate_delta(expected)
             self.back_fire()
-            self.update_weights()
+            if self.my_type is not LayerType.OUTPUT:
+                self.update_weights()
 
-        # Hidden Layer Node
-        if self.my_type is LayerType.HIDDEN:
-            self.register_back_input(from_node)
-            for node in self.output_nodes:
-                node.calculate_delta()
-            self.calculate_delta()
-            self.update_weights()
-            self.back_fire()
+        # # Output Layer Node
+        # if self.my_type is LayerType.OUTPUT:
+        #     self.register_back_input(from_node)
+        #     self.calculate_delta(expected)
+        #     self.back_fire()
+        #     self.update_weights()
+        #
+        # # Hidden Layer Node
+        # if self.my_type is LayerType.HIDDEN:
+        #     self.register_back_input(from_node)
+        #     for node in self.output_nodes:
+        #         node.calculate_delta()
+        #     self.calculate_delta()
+        #     self.update_weights()
+        #     self.back_fire()
 
         # # If Neurode type is Input type
         # if self.my_type is LayerType.INPUT:
@@ -137,6 +142,15 @@ class BPNeurode(Neurode):
 
             self.delta = sum_of_deltas * self.sigmoid_derivative(self.value)
 
+    def adjust_input_node(self, node, value):
+        """
+        Helper method for Update_weights
+
+        Updates the value of the given node in the input_nodes dict, adding
+        the value given to the current value.
+        """
+        self.input_nodes[node] += value
+
     def update_weights(self):
         """
         This function uses this formula to calculate the new weight for each
@@ -148,16 +162,32 @@ class BPNeurode(Neurode):
             learning rate)
         """
 
-        for node in self.input_nodes:
-            new_weight = self.input_nodes[node]
-            new_weight += node.value * self.delta * self.learning_rate
-
-            self.input_nodes[node] = new_weight
+        for key, node_data in self.output_nodes.items():
+            adjustment = key.get_learning_rate() * key.get_delta() * self.value
+            key.adjust_input_node(self, adjustment)
 
     def back_fire(self):
         """Recursive method which calls receive_back_input on each neurode
         connected to it's input_nodes dict."""
 
-        for node in self.output_nodes:
+        for node in self.input_nodes:
             if node.my_type is not LayerType.INPUT:
                 node.receive_back_input(self)
+
+    def get_learning_rate(self):
+        """
+        Getter function for learning rate attribute
+
+        Returns:
+            learning_rate attribute
+        """
+        return self.learning_rate
+
+    def get_delta(self):
+        """
+        Getter Function for delta attribute
+
+        Returns:
+            delta attribute
+        """
+        return self.delta
