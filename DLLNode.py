@@ -15,7 +15,7 @@ class DLLNode:
 
     def __str__(self):
         """Stringizer Method"""
-        pass
+        return "(DLL Note)"
 
     def set_next(self, next_node):
         """

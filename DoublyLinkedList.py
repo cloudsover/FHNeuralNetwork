@@ -19,7 +19,21 @@ class DoublyLinkedList:
 
     def __str__(self):
         """Stringizer"""
-        pass
+        separator = " -> "
+        len_separator = len(separator)
+
+        if self.is_empty():
+            return "\n[ empty list ]\n"
+
+        ret_str = "\n[START LIST]: "
+        p = self.head
+        while p is not None:
+            ret_str += (str(p) + separator)
+            p = p.get_next()
+
+        # remove extra "->" and add terminator
+        ret_str = ret_str[:-len_separator] + "  [END LIST]\n"
+        return ret_str
 
     def iterate(self):
         """

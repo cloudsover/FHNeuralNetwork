@@ -1,6 +1,6 @@
-from BPNeurode import BPNeurode
-from FFNeurode import FFNeurode
-from LayerType import LayerType
+from BPNeurode import *
+from FFNeurode import *
+from LayerType import *
 
 
 class FFBPNeurode(BPNeurode, FFNeurode):

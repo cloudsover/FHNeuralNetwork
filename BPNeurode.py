@@ -1,5 +1,4 @@
-from LayerType import LayerType
-from Neurode import Neurode
+from Neurode import *
 
 
 class BPNeurode(Neurode):
