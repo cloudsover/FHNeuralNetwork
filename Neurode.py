@@ -1,7 +1,7 @@
 import random
 from enum import Enum
 
-from MultiLinkNode import MultiLinkNode
+from MultiLinkNode import *
 from LayerType import LayerType
 
 
@@ -15,7 +15,7 @@ class Neurode(MultiLinkNode):
 
     """
 
-    def __init__(self, my_type: LayerType = LayerType.INPUT):
+    def __init__(self, my_type):
         """
         Inits Neurode with all class and inherited attributes initialized
 

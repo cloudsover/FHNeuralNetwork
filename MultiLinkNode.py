@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 
-from Neurode import *
-
 
 class MultiLinkNode(ABC):
     """

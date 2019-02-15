@@ -1,7 +1,5 @@
-from math import e
 import numpy as np
-from LayerType import LayerType
-from Neurode import Neurode
+from Neurode import *
 
 
 class FFNeurode(Neurode):
@@ -13,7 +11,7 @@ class FFNeurode(Neurode):
     - 'fires' when appropriate, passing data to the output side.
     """
 
-    def __init__(self, my_type: LayerType = LayerType.INPUT):
+    def __init__(self, my_type: LayerType):
         """Init method which initializes the FFNeurode class"""
         super().__init__(my_type)
 
@@ -28,7 +26,7 @@ class FFNeurode(Neurode):
         Returns:
             Float value between -1 and 1
         """
-        return 1 / (1 + e ** (-value))
+        return 1 / (1 + np.exp(-value))
 
     def receive_input(self, from_node: Neurode = None, input_value: float = 0):
         """
@@ -90,7 +88,8 @@ class FFNeurode(Neurode):
         if self.reporting_inputs == self.compare_inputs_full:
             self.reporting_inputs = 0
             return True
-        return False
+        else:
+            return False
 
     def fire(self):
         """
@@ -109,11 +108,11 @@ class FFNeurode(Neurode):
 
         for index, neurode in self.input_nodes.items():
             weighted_sum += index.get_value() * neurode
-        self.value = self.activate_sigmoid(weighted_sum)
+        self.value = FFNeurode.activate_sigmoid(weighted_sum)
 
         # Pass values to output nodes
         for node in self.output_nodes:
-            node.receive_input(self.value)
+            node.receive_input(self)
 
 
 def main():
