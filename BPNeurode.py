@@ -12,7 +12,7 @@ class BPNeurode(Neurode):
         learning_rate: learning rate of the network
     """
 
-    def __init__(self, my_type: LayerType = LayerType.INPUT):
+    def __init__(self, my_type: LayerType):
         """
         Inits BPNeurode with all class and inherited attributes initialized.
 
@@ -61,27 +61,6 @@ class BPNeurode(Neurode):
             self.back_fire()
             if self.my_type is not LayerType.OUTPUT:
                 self.update_weights()
-
-        # # Output Layer Node
-        # if self.my_type is LayerType.OUTPUT:
-        #     self.register_back_input(from_node)
-        #     self.calculate_delta(expected)
-        #     self.back_fire()
-        #     self.update_weights()
-        #
-        # # Hidden Layer Node
-        # if self.my_type is LayerType.HIDDEN:
-        #     self.register_back_input(from_node)
-        #     for node in self.output_nodes:
-        #         node.calculate_delta()
-        #     self.calculate_delta()
-        #     self.update_weights()
-        #     self.back_fire()
-
-        # # If Neurode type is Input type
-        # if self.my_type is LayerType.INPUT:
-        #     for neurode in self.output_nodes:
-        #         self.receive_back_input(neurode)
 
     def register_back_input(self, from_node) -> bool:
         """
