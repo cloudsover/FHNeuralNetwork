@@ -59,8 +59,10 @@ class FFNeurode(Neurode):
                 neurode.receive_input(self)
 
         # If Neurode type is Output or Hidden type
-        elif self.register_input(from_node):
-            self.fire()
+        elif self.my_type is LayerType.OUTPUT or \
+                self.my_type is LayerType.HIDDEN:
+            if self.register_input(from_node):
+                self.fire()
 
     def register_input(self, from_node: Neurode) -> bool:
         """
@@ -83,7 +85,7 @@ class FFNeurode(Neurode):
         """
 
         self.reporting_inputs = self.reporting_inputs | (
-                    2 ** list(self.input_nodes.keys()).index(from_node))
+                2 ** list(self.input_nodes.keys()).index(from_node))
 
         if self.reporting_inputs == self.compare_inputs_full:
             self.reporting_inputs = 0
@@ -108,7 +110,7 @@ class FFNeurode(Neurode):
 
         for index, neurode in self.input_nodes.items():
             weighted_sum += index.get_value() * neurode
-        self.value = FFNeurode.activate_sigmoid(weighted_sum)
+        self.value = self.activate_sigmoid(weighted_sum)
 
         # Pass values to output nodes
         for node in self.output_nodes:

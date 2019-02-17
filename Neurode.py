@@ -26,6 +26,7 @@ class Neurode(MultiLinkNode):
         super().__init__()
         self.value = 0  # current value of the Neurode
         self.my_type = my_type  # LayerType values: input, hidden, or output
+        self.name = random.randint(0,10)
 
     def get_value(self) -> float:
         """

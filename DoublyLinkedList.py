@@ -146,84 +146,9 @@ class DoublyLinkedList:
         if not self.current or not self.current.get_next():
             return False
 
-        self.current.set_next(self.current.get_next().get_next())
-        self.current.next.next.set_prev(self.current)
+        existing_node = self.current
+        remove_node = self.current.get_next()
+
+        existing_node.set_next(remove_node.get_next())
+        remove_node.get_next().set_prev(existing_node)
         return True
-
-
-def main():
-    testlist = DoublyLinkedList()
-    print("Testing initial state of DoublyLinkedList")
-    assert testlist.head is None
-    assert testlist.tail is None
-    assert testlist.current is None
-    nodelist = []
-    for i in range(0, 5):
-        temp = DLLNode()
-        nodelist.append(temp)
-        print(nodelist)
-    print("Test add first node to head and reset current")
-    testlist.add_to_head(nodelist[0])
-    testlist.reset_cur()
-    assert testlist.head is nodelist[0]
-    assert testlist.tail is nodelist[0]
-    assert testlist.current is nodelist[0]
-    assert testlist.current.get_next() is None
-    assert testlist.current.get_prev() is None
-    print("Test add another node to head")
-    testlist.add_to_head(nodelist[1])
-    assert testlist.head is nodelist[1]
-    assert testlist.tail is nodelist[0]
-    assert testlist.current is nodelist[0]
-    assert testlist.current.get_next() is None
-    assert testlist.current.get_prev() is nodelist[1]
-    assert testlist.head.get_next() is nodelist[0]
-    assert testlist.head.get_prev() is None
-    print("Test insert after current (should add to tail)")
-    testlist.insert_after_cur(nodelist[2])
-    assert testlist.tail is nodelist[2]
-    assert nodelist[2].get_next() is None
-    assert nodelist[2].get_prev() is nodelist[0]
-    assert nodelist[0].get_next() is nodelist[2]
-    assert nodelist[0].get_prev() is nodelist[1]
-    print("Test reset and insert current")
-    testlist.reset_cur()
-    testlist.insert_after_cur(nodelist[3])
-    assert testlist.tail is nodelist[2]
-    assert testlist.head is nodelist[1]
-    assert nodelist[1].get_next() is nodelist[3]
-    assert nodelist[1].get_prev() is None
-    assert nodelist[0].get_next() is nodelist[2]
-    assert nodelist[0].get_prev() is nodelist[3]
-    assert nodelist[3].get_next() is nodelist[0]
-    assert nodelist[3].get_prev() is nodelist[1]
-    print("Test remove from head")
-    testlist.remove_from_head()
-    assert testlist.tail is nodelist[2]
-    assert testlist.head is nodelist[3]
-    assert nodelist[3].get_next() is nodelist[0]
-    assert nodelist[3].get_prev() is None
-    print("Test iterate and rev_iterate")
-    assert testlist.reset_cur() == nodelist[3]
-    assert testlist.iterate() == nodelist[0]
-    assert testlist.iterate() == nodelist[2]
-    assert testlist.rev_iterate() == nodelist[0]
-    assert testlist.tail is nodelist[2]
-    assert testlist.current is nodelist[0]
-    print("Test remove after cur, removing tail")
-    testlist.remove_after_cur()
-    assert testlist.tail is nodelist[0]
-    assert nodelist[0].get_next() is None
-    print("Test remove after cur, nothing to remove")
-    assert testlist.remove_after_cur() is False
-    print("Test remove from head three times, last time should fail")
-    assert testlist.remove_from_head()
-    assert testlist.head is nodelist[0]
-    assert testlist.tail is nodelist[0]
-    assert testlist.remove_from_head()
-    assert not testlist.remove_from_head()
-    assert testlist.head is None
-    assert testlist.tail is None
-
-
-main()
