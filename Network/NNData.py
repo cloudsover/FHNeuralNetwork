@@ -1,5 +1,5 @@
 import collections
-from enum import Enum, auto
+from enum import Enum
 
 import numpy as np
 import random
@@ -234,8 +234,8 @@ class NNData:
             SEQUENTIAL: Indicates that training data is presented in
             sequential order.
         """
-        RANDOM = auto()
-        SEQUENTIAL = auto()
+        RANDOM = 0
+        SEQUENTIAL = 1
 
     # Inner Set Class ------------------------------------------------------
     class Set(Enum):
@@ -246,8 +246,8 @@ class NNData:
 
             TEST: Identifies that testing data is requested.
         """
-        TRAIN = auto()
-        TEST = auto()
+        TRAIN = 0
+        TEST = 1
 
 
 class DataMismatchError(Exception):

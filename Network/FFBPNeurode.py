@@ -1,3 +1,25 @@
+from Network.BPNeurode import BPNeurode
+from Network.FFNeurode import FFNeurode
+from Network.LayerType import LayerType
+
+
+class FFBPNeurode(BPNeurode, FFNeurode):
+    """
+    FFBNPNeurode merges the functionality of both the BPNeurode and the
+    FFNeurode.
+    """
+
+    def __init__(self, my_type: LayerType = LayerType.INPUT):
+        """
+        Inits FFBPNeurode with all inherited attributes initialized
+
+        Args:
+            my_type: LayerType enum. Determines the layer classification of
+            the neurode.
+        """
+        super().__init__(my_type)
+
+
 def main():
     print("These tests depend on your prior work.")
     print("Be sure you have either imported assignments 2, 4 and 5 or include them in the same file as assignment 6.")
@@ -74,7 +96,9 @@ def main():
         print("Error - calculate_delta is raising an error.  Is it named correctly?  Check your syntax")
     try:
         print("Testing update_weights")
-        onodes[0].update_weights()
+        hnodes[0].update_weights()
+        #hnodes[1].update_weights()
+
         if onodes[0].learning_rate == .05:
             if .4 + .06 * onodes[0].learning_rate - .001 < onodes[0].input_nodes[hnodes[0]] \
                     < .4 + .06 * onodes[0].learning_rate + .001:
@@ -117,6 +141,5 @@ def main():
         print("    Hint1: Check receive_back_input()")
         print("    Hint2: Check back_fire(), especially the order of method calls")
         print("If you hit a wall, be sure to seek help in the discussion form, from the instructor and from the tutors")
-
 if __name__ == "__main__":
     main()

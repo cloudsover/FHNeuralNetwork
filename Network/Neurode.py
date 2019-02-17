@@ -1,8 +1,7 @@
 import random
 from enum import Enum
 
-from MultiLinkNode import *
-from LayerType import LayerType
+from Network.MultiLinkNode import MultiLinkNode
 
 
 class Neurode(MultiLinkNode):

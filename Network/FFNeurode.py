@@ -1,5 +1,7 @@
 import numpy as np
-from Neurode import *
+
+from Network.LayerType import LayerType
+from Network.Neurode import *
 
 
 class FFNeurode(Neurode):

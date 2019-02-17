@@ -1,4 +1,5 @@
-from Neurode import *
+from Network.LayerType import LayerType
+from Network.Neurode import *
 
 
 class BPNeurode(Neurode):

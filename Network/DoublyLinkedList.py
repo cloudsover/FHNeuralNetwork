@@ -1,4 +1,4 @@
-from DLLNode import DLLNode
+from Network.DLLNode import DLLNode
 
 
 class DoublyLinkedList:

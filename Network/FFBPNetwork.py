@@ -1,5 +1,5 @@
-from NNData import NNData
-from LayerList import LayerList
+from Network.NNData import NNData
+from Network.LayerList import LayerList
 import numpy as np
 
 

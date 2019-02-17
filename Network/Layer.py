@@ -1,6 +1,6 @@
-from FFBPNeurode import *
-from DLLNode import *
-from LayerType import *
+from Network.FFBPNeurode import *
+from Network.DLLNode import *
+from Network.LayerType import *
 
 
 class Layer(DLLNode):

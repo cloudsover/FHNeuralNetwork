@@ -1,6 +1,6 @@
-from Layer import Layer
-from LayerType import LayerType
-from DoublyLinkedList import DoublyLinkedList
+from Network.Layer import Layer
+from Network.LayerType import LayerType
+from Network.DoublyLinkedList import DoublyLinkedList
 
 
 class LayerList(DoublyLinkedList):
