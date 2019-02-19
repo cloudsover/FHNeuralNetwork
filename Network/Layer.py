@@ -29,7 +29,6 @@ class Layer(DLLNode):
         super().__init__()
         self.my_type = my_type
         self.neurodes = []
-        self.name = random.randint(0,100)
 
         self.init_neurodes(num_neurodes)
 

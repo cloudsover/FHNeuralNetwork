@@ -1,3 +1,6 @@
+import copy
+
+from Network.FFBPNeurode import FFBPNeurode
 from Network.NNData import NNData
 from Network.LayerList import LayerList
 import numpy as np
@@ -10,7 +13,9 @@ class FFBPNetwork:
         """TODO Docs"""
 
         self.layers = LayerList(num_inputs, num_outputs)
-        pass
+        self.running_error = []
+        self.csv = ''
+        self.rmse_csv = 'epoch, rsme\n'
 
     def add_hidden_layer(self, num_neurodes: int = 5):
         """TODO Docs"""
@@ -26,43 +31,118 @@ class FFBPNetwork:
             raise FFBPNetwork.EmptySetException
 
         else:
-            current_epoc = 0
-            for epoc in range(epochs):
-                if self.print_output_labels(verbosity, current_epoc):
-                    pass
-                # Print output and label (expected value) for each example
+            print('TRAINING\n')
+            size = data_set.get_number_samples(data_set.Set.TRAIN)
+            for epoch in range(1, epochs + 1):
+                epoch_data = copy.deepcopy(data_set)
+                error = 0
+                for data in range(size):
 
-                if self.print_rmse(verbosity, current_epoc):
-                    pass
+                    data = epoch_data.get_one_item(data_set.Set.TRAIN)
+                    self.send_data_to_inputs(data[0])
+                    error = self.calculate_error_for_example(data[1])
+                    self.send_labels_to_outputs(data[1])
+                    if verbosity > 1 and epoch > 1000:
+                        print("\nEpoch:", epoch)
+                        print(self.print_output_and_values(data[1]))
+                    if verbosity > 0 and epoch % 100 == 0:
+                        print("\nEpoch : ", epoch)
+                        rmse = self.calculate_rmse(error, size)
+                        print(self.print_rmse(rmse))
 
-    @staticmethod
-    def print_rmse(verbosity, epochs):
-        """TODO Docs"""
-        if verbosity > 1 and epochs % 100 == 0:
-            return True
-        return False
-
-    @staticmethod
-    def print_output_labels(verbosity, epochs, data: NNData):
-        """TODO Docs"""
-        if verbosity > 0 and epochs > 1000:
-            pass
-
-    def calculate_rmse(self):
-        """TODO Docs"""
-        pass
+        print("\nFinal RMSE: ", epoch)
+        self.rmse_csv += str(epochs) + ','
+        rmse = self.calculate_rmse(error, size)
+        print(self.print_rmse(rmse))
 
     def test(self, data_set: NNData):
+        """TODO Docs"""
+        if data_set is None:
+            raise FFBPNetwork.EmptySetException
+        else:
+            print('\nTESTING:')
+            self.csv = ''
+            error = 0
+            size = data_set.get_number_samples(data_set.Set.TEST)
+            self.csv += 'Example, Predicted, Expected\n'
+            datas = copy.deepcopy(data_set)
+            for data in range(size):
+                data = datas.get_one_item(data_set.Set.TEST)
+                self.send_data_to_inputs(data[0])
+                predicted = self.layers.output_layer.neurodes[0].get_value()
+                error += self.calculate_error_for_example(data[1])
+                self.csv += str(float(data[0])) + ','
+                self.csv += str(predicted) + ','
+                self.csv += str(float(data[1])) + '\n'
+
+            print(self.csv)
+            print("Final RMSE: ")
+            rmse = self.calculate_rmse(error, size)
+            self.rmse_csv += str(rmse) +'\n'
+            print(self.print_rmse(rmse))
+
+    # TODO Helper Functions ---------------------------------------------------
+
+    # TODO Data Functions -----------------------------------------------------
+    def send_data_to_inputs(self, example_data):
+        """TODO Docs"""
+        inputs: list[FFBPNeurode] = self.layers.input_layer.neurodes
+
+        for node in inputs:
+            node.receive_input(None, example_data)
+
+    def send_labels_to_outputs(self, label_data):
+        """TODO Docs"""
+        outputs: list[FFBPNeurode] = self.layers.output_layer.neurodes
+
+        for node in outputs:
+            node.receive_back_input(None, label_data)
+
+    # TODO Math Functions -----------------------------------------------------
+    def calculate_error_for_example(self, expected):
+        """TODO Docs"""
+        outputs = self.layers.output_layer.neurodes
+        error = 0
+        for node in outputs:
+            observed = node.get_value()
+            error += observed - expected
+        return error
+
+    @staticmethod
+    def calculate_rmse(error, size):
+        """TODO Docs"""
+        se = np.power(error, 2)
+        mse = (1 / size) * se
+        rmse = np.power(mse, 1 / 2)
+        return rmse
+
+    # TODO Printer Functions --------------------------------------------------
+    def print_output_and_values(self, label_data):
+        """TODO Docs"""
+        outputs = self.layers.output_layer.neurodes
+
+        ret_string = 'Observed Value: '
+        for node in outputs:
+            ret_string += '[' + str(node.get_value()) + ']'
+        ret_string += '\nLabel Value: ' + str(label_data)
+        return ret_string
+
+    @staticmethod
+    def print_rmse(rmse):
+        """TODO Docs"""
+        ret_string = 'RMSE: '
+        ret_string += str(rmse)
+        return ret_string
+
+    def print_for_train_data(self, example_data, label_data):
         """TODO Docs"""
         pass
 
     class EmptyLayerException(Exception):
         """TODO Docs"""
-        pass
 
     class EmptySetException(Exception):
         """TODO Docs"""
-        pass
 
 
 def main():
@@ -150,6 +230,25 @@ def main():
          [1.57, 0.999999682931835]])
     X = SINData[:, 0:1]
     Y = SINData[:, 1:2]
+    max_epochs = 100000
     data = NNData(X, Y, 10)
-    network.train(data, 10001)
-    network.test(data)
+    epoch = 100
+    for i in range(max_epochs):
+        network.train(data, epoch)
+        network.test(data)
+
+        file_name = 'epoch-' + str(epoch) + '.txt'
+        with open(file_name, 'w', encoding='utf-8') as my_file:
+            file = network.csv
+            for line in file:
+                my_file.write(line)
+
+        epoch += 100
+    with open('rmse-epoch.txt', 'w', encoding='utf-8') as my_file:
+        file = network.rmse_csv
+        for line in file:
+            my_file.write(line)
+    print('Fin')
+
+
+main()

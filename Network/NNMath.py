@@ -1,3 +1,4 @@
+"""TODO Module Docs"""
 import numpy as np
 
 
@@ -47,6 +48,16 @@ def mse_formula(x_list, y_list):
     for i in range(n):
         mse += np.exp(i - y_hat, 2)
     return mse / n
+
+
+def rmse_formula(observed_list, expected_list):
+    n = len(observed_list)
+
+    mse = 0
+    for observed, expected, in observed_list, expected_list:
+        mse += np.power((observed - expected), 2)
+    mse = mse / n
+    return np.power(mse, 1 / 2)
 
 # TODO migrate sigmoid
 # TODO migrate sigmoid derivative

@@ -82,7 +82,7 @@ class NNData:
         Raises:
             DataMismatchError: Raised if x and y are not the same length.
             """
-        if self.x and self.y is not None:
+        if self.x is not None and self.y is not None:
             if len(self.x) != len(self.y):
                 raise DataMismatchError
 

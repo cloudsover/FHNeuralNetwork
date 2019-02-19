@@ -30,7 +30,7 @@ class FFNeurode(Neurode):
         """
         return 1 / (1 + np.exp(-value))
 
-    def receive_input(self, from_node: Neurode = None, input_value: float = 0):
+    def receive_input(self, from_node: Neurode = None, input_value=0):
         """
         Input processing method which has different functionality
         depending on the classification of the Neurode.
@@ -55,10 +55,11 @@ class FFNeurode(Neurode):
         """
 
         # If Neurode type is Input type
+        value = input_value
         if self.my_type is LayerType.INPUT:
-            self.value = input_value
+            self.value = float(value)
             for neurode in self.output_nodes:
-                neurode.receive_input(self)
+                neurode.receive_input(self, self.value)
 
         # If Neurode type is Output or Hidden type
         elif self.my_type is LayerType.OUTPUT or \

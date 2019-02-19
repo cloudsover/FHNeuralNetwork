@@ -97,7 +97,7 @@ def main():
     try:
         print("Testing update_weights")
         hnodes[0].update_weights()
-        #hnodes[1].update_weights()
+        hnodes[1].update_weights()
 
         if onodes[0].learning_rate == .05:
             if .4 + .06 * onodes[0].learning_rate - .001 < onodes[0].input_nodes[hnodes[0]] \

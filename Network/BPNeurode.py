@@ -38,7 +38,7 @@ class BPNeurode(Neurode):
         """
         return value * (1 - value)
 
-    def receive_back_input(self, from_node, expected: float = 0):
+    def receive_back_input(self, from_node, expected=0):
         """
         This function collects inputs from connected neurodes
         and decides when to call back_fire().
@@ -57,13 +57,14 @@ class BPNeurode(Neurode):
             expected: expected value of node
 
         """
+
         if self.register_back_input(from_node):
             self.calculate_delta(expected)
             self.back_fire()
             if self.my_type is not LayerType.OUTPUT:
                 self.update_weights()
 
-    def register_back_input(self, from_node) -> bool:
+    def register_back_input(self, from_node=None) -> bool:
         """
         This method updates the binary encoding and checks if all inputs
         are reporting.
@@ -171,3 +172,7 @@ class BPNeurode(Neurode):
             delta attribute
         """
         return self.delta
+
+    def get_weight_for_input_node(self, from_node):
+        """TODO Docs"""
+        return self.input_nodes[from_node]
