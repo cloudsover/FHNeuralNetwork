@@ -5,17 +5,28 @@ import numpy as np
 
 
 class FFBPNetwork:
-    """TODO Docs"""
+    """
+    Feed-Forward Back-Propagation neural network
+
+    Attributes:
+        layers: Layer list initialized with input and output layers in place
+                with the number of nodes specified for each
+
+    """
 
     def __init__(self, num_inputs=1, num_outputs=1):
-        """TODO Docs"""
-
+        """Inits FFBPNetwork with all attributes initialized"""
         self.layers = LayerList(num_inputs, num_outputs)
-        # self.csv = ''
-        # self.rmse_csv = 'epoch, rsme\n'
 
     def add_hidden_layer(self, num_neurodes: int = 5):
-        """TODO Docs"""
+        """
+        Adds a hidden neurode layer into the layers LayerList with the
+        given number of neurodes initialized.
+
+        Args:
+            num_neurodes (int): number of neurodes to initialize in the neural
+            layer. Default value is 5.
+        """
         if num_neurodes < 1:
             raise EmptyLayerException
         else:
@@ -23,53 +34,103 @@ class FFBPNetwork:
 
     def train(self, data_set: NNData, epochs: int = 1000, verbosity=2,
               order=NNData.Order.RANDOM):
-        """TODO Docs"""
+        """
+        Runs the training data through the neural network for the given
+        number of epochs.
+
+        Args:
+            data_set (NNData): Object containing the training data.
+            epochs (int): number of epochs to train the data.
+            verbosity: todo
+            order: Randomize, or keep data sequential.
+
+        """
         if data_set.x is None:
             raise EmptySetException
         else:
             print("Training:")
-            size = data_set.get_number_samples(NNData.Set.TRAIN)
+
             for epoch in range(epochs):
                 rmse = 0
                 data_set.prime_data(NNData.Set.TRAIN, order)
-                rmse = self.run_train_data(data_set, size, NNData.Set.TRAIN)
+                rmse = self.run_train_data(data_set)
                 print("Epoch:", epoch, "Rmse:", rmse)
 
     def test(self, data_set: NNData):
-        """TODO Docs"""
+        """
+        This function runs the testing data through the neural network.
+
+        Args:
+            data_set (NNData): Object containing the testing data
+        """
         pass
 
-    # TODO Data Functions -----------------------------------------------------
-
+    # Data Functions ----------------------------------------------------------
     def send_data_to_inputs(self, data):
-        """TODO Docs"""
+        """
+        Helper function. Sends input data to the input nodes, iterating
+        through each node and data value, if there is more than one value
+        for the example data.
+
+        Args:
+            data (list): example data to send to the input layer nodes.
+        """
         list_of_inputs: list[FFBPNeurode] = self.layers.input_layer.neurodes
 
         for index, node in enumerate(list_of_inputs):
             node.receive_input(None, data[index])
 
     def send_data_to_outputs(self, data):
-        """TODO Docs"""
+        """
+        Helper function. Sends label data to the output nodes, iterating
+        through each node and data value, if there is more than one value
+        for the label data. The nodes then perform the back-propagation
+        through the network with the expected values given from the label data.
+
+        Args:
+            data (list): example data to send to the output layer nodes.
+        """
         list_of_outputs: list[FFBPNeurode] = self.layers.output_layer.neurodes
 
         for index, node in enumerate(list_of_outputs):
-            # print("Observed:", node.value, "Expected:", data[index])
             node.receive_back_input(None, data[index])
 
-    def run_train_data(self, epoch_data: NNData, size, set_type) -> float:
-        """TODO Docs"""
+    def run_train_data(self, epoch_data: NNData) -> float:
+        """
+        Helper function. Sends input data to the input layer, calculates
+        the error from the output nodes against the expected values,
+        and then sends the expected values to the output nodes to backprop
+        through the network.
+
+        Args:
+            epoch_data (NNData): Object containing the data set.
+
+        Returns:
+            The root mean squared error of the epoch. (float)
+        """
         error = 0
+        size = epoch_data.get_number_samples(NNData.Set.TRAIN)
         for i in range(size):
-            single_data = epoch_data.get_one_item(set_type)
+            single_data = epoch_data.get_one_item(NNData.Set.TRAIN)
             self.send_data_to_inputs(single_data[0])
             error += self.calculate_error(single_data[1])
             self.send_data_to_outputs(single_data[1])
         return self.calculate_rmse(size, error)
 
-    # TODO Math Functions -----------------------------------------------------
-
+    # Math Functions ----------------------------------------------------------
     def calculate_error(self, label_values):
-        """TODO Docs"""
+        """
+        Helper function which calculates the squared error of each label
+        against the predicted values from the output layer.
+
+        Args:
+            label_values: expected label values to compare against observed
+            values from output nodes.
+
+        Returns:
+            calculates the squared error of the output nodes
+
+        """
         list_of_outputs: list[FFBPNeurode] = self.layers.get_output_nodes()
 
         total_error = 0
@@ -79,19 +140,29 @@ class FFBPNetwork:
         return total_error / len(label_values)
 
     @staticmethod
-    def calculate_rmse(size, squared_error):
-        """TODO Docs"""
+    def calculate_rmse(size: int, squared_error: float) -> float:
+        """
+        Static helper method which calculates the mean squared error given the
+        size of the sample and the current squared error.
+
+        Args:
+            size (int): size of the sample data
+            squared_error (float): current running squared error for data.
+
+        Returns:
+            Root mean squared error (float)
+        """
         return np.sqrt(squared_error / size)
 
     # TODO Printer Functions --------------------------------------------------
 
 
 class EmptyLayerException(Exception):
-    """TODO Docs"""
+    """Layer is empty"""
 
 
 class EmptySetException(Exception):
-    """TODO Docs"""
+    """Data set is empty"""
 
 
 # def main():
