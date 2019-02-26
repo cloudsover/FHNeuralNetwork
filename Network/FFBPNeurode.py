@@ -97,7 +97,7 @@ def main():
     try:
         print("Testing update_weights")
         hnodes[0].update_weights()
-        hnodes[1].update_weights()
+        #hnodes[1].update_weights()
 
         if onodes[0].learning_rate == .05:
             if .4 + .06 * onodes[0].learning_rate - .001 < onodes[0].input_nodes[hnodes[0]] \
@@ -141,5 +141,3 @@ def main():
         print("    Hint1: Check receive_back_input()")
         print("    Hint2: Check back_fire(), especially the order of method calls")
         print("If you hit a wall, be sure to seek help in the discussion form, from the instructor and from the tutors")
-if __name__ == "__main__":
-    main()

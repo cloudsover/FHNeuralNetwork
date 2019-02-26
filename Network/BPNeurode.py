@@ -112,16 +112,16 @@ class BPNeurode(Neurode):
 
         # Output Node
         if self.my_type == LayerType.OUTPUT:
-            self.delta = (expected - self.value) * self.sigmoid_derivative(
-                self.value)
+            error = expected - self.value
+            self.delta = error * self.sigmoid_derivative(self.value)
 
         # Hidden Node
-        sum_of_deltas = 0
         if self.my_type == LayerType.HIDDEN:
+            self.delta = 0
             for node in self.output_nodes:
-                sum_of_deltas += (node.input_nodes[self] * node.delta)
-
-            self.delta = sum_of_deltas * self.sigmoid_derivative(self.value)
+                self.delta += (node.get_weight_for_input_node(self) *
+                               node.delta)
+            self.delta *= self.sigmoid_derivative(self.value)
 
     def adjust_input_node(self, node, value):
         """
@@ -152,8 +152,7 @@ class BPNeurode(Neurode):
         connected to it's input_nodes dict."""
 
         for node in self.input_nodes:
-            if node.my_type is not LayerType.INPUT:
-                node.receive_back_input(self)
+            node.receive_back_input(self)
 
     def get_learning_rate(self):
         """

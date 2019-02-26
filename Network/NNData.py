@@ -1,8 +1,7 @@
 import collections
-from enum import Enum
-
-import numpy as np
+from enum import Enum, auto
 import random
+import numpy as np
 
 
 class NNData:
@@ -13,6 +12,30 @@ class NNData:
 
     """
     DEFAULT_PERCENTAGE = 100
+
+    class Order(Enum):
+        """Enum which determines whether the training data is presented in
+        the same order to the neural network each time, or in a random order
+
+        Returns:
+            RANDOM: Indicates that training data is presented in random order.
+
+            SEQUENTIAL: Indicates that training data is presented in
+            sequential order.
+        """
+        RANDOM = 0
+        SEQUENTIAL = 1
+
+    class Set(Enum):
+        """Enum which helps to identify whether we are requesting training
+        set data or testing set data
+        Returns:
+            TRAIN: Identifies that training data is requested.
+
+            TEST: Identifies that testing data is requested.
+        """
+        TRAIN = 0
+        TEST = 1
 
     def __init__(self,
                  x: list = None,
@@ -38,10 +61,11 @@ class NNData:
         self.y: list = y  # label part of data - List of lists
         self.train_indices: list = None  # List of pointers to training subset
         self.train_pool: list = None  # dequeue containing examples not yet
-        # used
+        self.train_data: tuple = (self.train_indices, self.train_pool)
+
         self.test_indices: list = None  # List of pointers for testing subset
         self.test_pool: list = None  # dequeue containing examples not used in
-        # test
+        self.test_data: tuple = (self.test_indices, self.test_pool)
 
         # Filter given percentage data through mutator method
         self.train_percentage = NNData.percentage_limiter(percentage)
@@ -50,7 +74,7 @@ class NNData:
         self.load_data(x, y)
 
     @staticmethod
-    def percentage_limiter(percentage: int) -> int:
+    def percentage_limiter(percentage: int = DEFAULT_PERCENTAGE) -> int:
         """
         Filters the data given.
 
@@ -65,14 +89,10 @@ class NNData:
         """
 
         # Mutates Values to upper or lower bounds if bad data is passed
-        if percentage < 0:
-            return 0
-        if percentage > 100:
-            return 100
-        else:
-            return int(percentage)
 
-    def load_data(self, x, y):
+        return min(100, max(percentage, 0))
+
+    def load_data(self, x: list = None, y: list = None):
         """ Checks that the lengths of x and y are the same. Calls the
         method split_set
 
@@ -82,9 +102,10 @@ class NNData:
         Raises:
             DataMismatchError: Raised if x and y are not the same length.
             """
-        if self.x is not None and self.y is not None:
-            if len(self.x) != len(self.y):
-                raise DataMismatchError
+        if len(x) != len(y):
+            raise DataMismatchError
+        self.x = x
+        self.y = y
 
         self.split_set()
 
@@ -166,14 +187,14 @@ class NNData:
 
         # Testing if training pool is empty
         if my_set is self.Set.TRAIN:
-            if len(self.train_pool) == 0:
+            if not self.train_pool:
                 return True
-            else:
+            if self.train_pool:
                 return False
 
-        elif len(self.test_pool) == 0:
+        if not self.test_pool:
             return True
-        else:
+        if self.test_pool:
             return False
 
     def get_number_samples(self, my_set=None) -> int:
@@ -216,38 +237,11 @@ class NNData:
             return ret_item
 
         # Pop from test set
-        elif my_set is self.Set.TEST:
-            index = self.test_pool.popleft()
-            example = self.x[index]
-            label = self.y[index]
-            ret_item = [example, label]
-            return ret_item
-
-    # Inner Order Class ------------------------------------------------------
-    class Order(Enum):
-        """Enum which determines whether the training data is presented in
-        the same order to the neural network each time, or in a random order
-
-        Returns:
-            RANDOM: Indicates that training data is presented in random order.
-
-            SEQUENTIAL: Indicates that training data is presented in
-            sequential order.
-        """
-        RANDOM = 0
-        SEQUENTIAL = 1
-
-    # Inner Set Class ------------------------------------------------------
-    class Set(Enum):
-        """Enum which helps to identify whether we are requesting training
-        set data or testing set data
-        Returns:
-            TRAIN: Identifies that training data is requested.
-
-            TEST: Identifies that testing data is requested.
-        """
-        TRAIN = 0
-        TEST = 1
+        index = self.test_pool.popleft()
+        example = self.x[index]
+        label = self.y[index]
+        ret_item = [example, label]
+        return ret_item
 
 
 class DataMismatchError(Exception):
@@ -255,7 +249,6 @@ class DataMismatchError(Exception):
     pass
 
 
-# Unit Test
 def main():
     errors = False
     try:
@@ -335,7 +328,8 @@ def main():
         print("No errors were identified by the unit test.")
         print("You should still double check that your code meets spec.")
         print(
-            "You should also check that PyCharm does not identify any PEP-8 issues.")
+            "You should also check that PyCharm does not identify any PEP-8 "
+            "issues.")
 
 
 if __name__ == "__main__":

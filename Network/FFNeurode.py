@@ -57,7 +57,7 @@ class FFNeurode(Neurode):
         # If Neurode type is Input type
         value = input_value
         if self.my_type is LayerType.INPUT:
-            self.value = float(value)
+            self.value = value
             for neurode in self.output_nodes:
                 neurode.receive_input(self, self.value)
 
