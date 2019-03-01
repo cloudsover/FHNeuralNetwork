@@ -36,6 +36,7 @@ class BPNeurode(Neurode):
         Return:
             The calculated derivative at the given value.
         """
+        # TODO Change to Hyperbolic Tan
         return value * (1 - value)
 
     def receive_back_input(self, from_node, expected=0):
@@ -109,6 +110,7 @@ class BPNeurode(Neurode):
         Args:
             expected: expected value
         """
+        # TODO Add function input for different delta calculations
 
         # Output Node
         if self.my_type == LayerType.OUTPUT:

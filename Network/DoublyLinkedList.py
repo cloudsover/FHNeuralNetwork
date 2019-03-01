@@ -1,5 +1,7 @@
 from Network.DLLNode import DLLNode
 
+# TODO Take out getters a setters
+
 
 class DoublyLinkedList:
     """

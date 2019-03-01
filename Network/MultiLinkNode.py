@@ -1,3 +1,4 @@
+# TODO Optimize imports, math ( np )
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 

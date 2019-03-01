@@ -144,7 +144,7 @@ class FFBPNetwork:
             single_data = epoch_data.get_one_item(NNData.Set.TEST)
             self.send_data_to_inputs(single_data[0])
             error += self.calculate_error(single_data[1])
-        return self.calculate_rmse(size, error)
+        return self.calculate_rmse(size * len(epoch_data.y[0]), error)
 
     # Math Functions ----------------------------------------------------------
     def calculate_error(self, label_values):
@@ -166,7 +166,7 @@ class FFBPNetwork:
         for index, node in enumerate(list_of_outputs):
             error = node.value - label_values[index]
             total_error += np.power(error, 2)
-        return total_error / len(label_values)
+        return total_error
 
     @staticmethod
     def calculate_rmse(size: int, squared_error: float) -> float:
@@ -216,12 +216,12 @@ class EmptySetException(Exception):
 def main():
     def run_iris():
         network = FFBPNetwork(4, 3)
-        network.add_hidden_layer(4)
-        network.add_hidden_layer(3)
-        network.add_hidden_layer(4)
-        network.add_hidden_layer(3)
-        network.add_hidden_layer(4)
-        network.add_hidden_layer(3)
+        network.add_hidden_layer(100)
+        # network.add_hidden_layer(1500)
+        # network.add_hidden_layer(1415)
+        # network.add_hidden_layer(1375)
+        # network.add_hidden_layer(1255)
+        # network.add_hidden_layer(1375)
         Iris_X = [[5.1, 3.5, 1.4, 0.2], [4.9, 3, 1.4, 0.2],
                   [4.7, 3.2, 1.3, 0.2],
                   [4.6, 3.1, 1.5, 0.2],
@@ -376,8 +376,8 @@ def main():
                   [0, 0, 1, ],
                   [0, 0, 1, ], [0, 0, 1, ],
                   [0, 0, 1, ], [0, 0, 1, ], [0, 0, 1, ]]
-        data = NNData(Iris_X, Iris_Y, 30)
-        network.train(data, 10001)
+        data = NNData(Iris_X, Iris_Y, 45)
+        network.train(data, 7001)
         network.test(data)
 
     def run_sin():
@@ -511,9 +511,9 @@ def main():
             if not network.layers.iterate():
                 break
 
-    run_tests()
+    # run_tests()
     run_iris()
-    run_sin()
+    # run_sin()
     # run_XOR()
 
 

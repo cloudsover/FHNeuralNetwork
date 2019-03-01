@@ -1,3 +1,5 @@
+# TODO Optimize imports, math
+# TODO Take out getters and setters
 from Network.Layer import Layer
 from Network.LayerType import LayerType
 from Network.DoublyLinkedList import DoublyLinkedList

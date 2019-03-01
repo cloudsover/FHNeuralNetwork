@@ -1,3 +1,5 @@
+# TODO Take out getters and setters ( not mutate)
+
 import random
 from enum import Enum
 
