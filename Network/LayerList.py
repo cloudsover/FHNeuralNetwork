@@ -32,6 +32,7 @@ class LayerList(DoublyLinkedList):
         self.output_layer = Layer(num_outputs, LayerType.OUTPUT)
 
         self.add_to_head(self.input_layer)
+        self.reset_cur()
         self.reconnect_outputs(self.input_layer, self.output_layer)
 
         self.insert_after_cur(self.output_layer)
@@ -67,6 +68,8 @@ class LayerList(DoublyLinkedList):
             new_layer: Layer to add into LayerList
         """
         from_layer = self.current
+        if self.current is None:
+            self.reset_cur()
 
         if new_layer.my_type is LayerType.OUTPUT:
             self.reconnect_nodes(from_layer, new_layer)

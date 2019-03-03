@@ -119,6 +119,8 @@ class DoublyLinkedList:
             new_node: node to add
 
         """
+
+
         if self.current is self.tail:
             new_node.set_prev(self.tail.get_prev())
             self.tail = new_node

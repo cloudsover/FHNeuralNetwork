@@ -144,7 +144,7 @@ class FFBPNetwork:
             single_data = epoch_data.get_one_item(NNData.Set.TEST)
             self.send_data_to_inputs(single_data[0])
             error += self.calculate_error(single_data[1])
-        return self.calculate_rmse(size * len(epoch_data.y[0]), error)
+        return self.calculate_rmse(size, error)
 
     # Math Functions ----------------------------------------------------------
     def calculate_error(self, label_values):
@@ -160,13 +160,13 @@ class FFBPNetwork:
             calculates the squared error of the output nodes
 
         """
-        list_of_outputs = self.layers.get_output_nodes()
-
+        list_of_outputs = list(self.layers.get_output_nodes())
+        size = len(list_of_outputs)
         total_error = 0
         for index, node in enumerate(list_of_outputs):
             error = node.value - label_values[index]
             total_error += np.power(error, 2)
-        return total_error
+        return total_error / size
 
     @staticmethod
     def calculate_rmse(size: int, squared_error: float) -> float:
@@ -182,8 +182,6 @@ class FFBPNetwork:
             Root mean squared error (float)
         """
         return np.sqrt(squared_error / size)
-
-    # TODO Printer Functions --------------------------------------------------
 
 
 class EmptyLayerException(Exception):
@@ -217,11 +215,7 @@ def main():
     def run_iris():
         network = FFBPNetwork(4, 3)
         network.add_hidden_layer(100)
-        # network.add_hidden_layer(1500)
-        # network.add_hidden_layer(1415)
-        # network.add_hidden_layer(1375)
-        # network.add_hidden_layer(1255)
-        # network.add_hidden_layer(1375)
+
         Iris_X = [[5.1, 3.5, 1.4, 0.2], [4.9, 3, 1.4, 0.2],
                   [4.7, 3.2, 1.3, 0.2],
                   [4.6, 3.1, 1.5, 0.2],
@@ -377,7 +371,7 @@ def main():
                   [0, 0, 1, ], [0, 0, 1, ],
                   [0, 0, 1, ], [0, 0, 1, ], [0, 0, 1, ]]
         data = NNData(Iris_X, Iris_Y, 45)
-        network.train(data, 7001)
+        network.train(data, 1001)
         network.test(data)
 
     def run_sin():
@@ -483,14 +477,18 @@ def main():
                  [0.998152472497548], [0.998710143975583], [0.999167945271476],
                  [0.999525830605479],
                  [0.999783764189357], [0.999941720229966], [0.999999682931835]]
-        data = NNData(sin_X, sin_Y, 10)
-        network.train(data, 10001)
+        data = NNData(sin_X, sin_Y, 30)
+        network.train(data, 1001)
         network.test(data)
 
-    # def run_XOR():
-    #     # Student should replace both lines of code below
-    #     print("Student Code is missing")
-    #     assert False
+    def run_XOR():
+        network = FFBPNetwork(2, 1)
+        network.add_hidden_layer(3)
+        XORx = [[0, 0], [1, 0], [0, 1], [1, 1]]
+        XORy = [[0], [1], [1], [0]]
+        data = NNData(XORx, XORy, 50)
+        network.train(data, 1001)
+        network.test(data)
 
     def run_tests():
         network = FFBPNetwork(1, 1)
@@ -511,10 +509,10 @@ def main():
             if not network.layers.iterate():
                 break
 
-    # run_tests()
+    run_tests()
     run_iris()
-    # run_sin()
-    # run_XOR()
+    run_sin()
+    run_XOR()
 
 
 if __name__ == "__main__":
