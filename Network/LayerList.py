@@ -107,6 +107,9 @@ class LayerList(DoublyLinkedList):
         Args:
             num_neurodes: number of neurodes to be in the new hidden layer
         """
+        if self.current is None:
+            self.current = self.head
+
         if self.current is self.tail:
             raise NodePositionError
         else:
