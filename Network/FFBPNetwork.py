@@ -52,10 +52,8 @@ class FFBPNetwork:
             print("Training:")
 
             for epoch in range(epochs):
-                rmse = 0
                 data_set.prime_data(NNData.Set.TRAIN, order)
-                rmse = self.run_train_data(data_set)
-                print("Epoch:", epoch, "Rmse:", rmse)
+                self.run_train_data(data_set, verbosity, epoch)
 
     def test(self, data_set: NNData, order=NNData.Order.RANDOM):
         """
@@ -63,6 +61,7 @@ class FFBPNetwork:
 
         Args:
             data_set (NNData): Object containing the testing data
+            order: Order selection to randomize data or keep sequential
         """
 
         if data_set.y is None:
@@ -103,7 +102,7 @@ class FFBPNetwork:
         for index, node in enumerate(list_of_outputs):
             node.receive_back_input(None, data[index])
 
-    def run_train_data(self, epoch_data: NNData) -> float:
+    def run_train_data(self, epoch_data: NNData, verbosity, epoch):
         """
         Helper function. Sends input data to the input layer, calculates
         the error from the output nodes against the expected values,
@@ -112,18 +111,26 @@ class FFBPNetwork:
 
         Args:
             epoch_data (NNData): Object containing the data set.
+            verbosity: how often to print epoch details
+            epoch: current epoch
 
         Returns:
             The root mean squared error of the epoch. (float)
         """
         error = 0
         size = epoch_data.get_number_samples(NNData.Set.TRAIN)
+        outputs = []
+        labels = []
         for _ in range(size):
             single_data = epoch_data.get_one_item(NNData.Set.TRAIN)
+
             self.send_data_to_inputs(single_data[0])
             error += self.calculate_error(single_data[1])
             self.send_data_to_outputs(single_data[1])
-        return self.calculate_rmse(size, error)
+            outputs.append(self.collect_outputs())
+            labels.append(single_data[1])
+        self.print_training_data(verbosity, epoch, outputs, labels,
+                                 self.calculate_rmse(size, error))
 
     def run_test_data(self, epoch_data: NNData) -> float:
         """
@@ -146,25 +153,34 @@ class FFBPNetwork:
             error += self.calculate_error(single_data[1])
         return self.calculate_rmse(size, error)
 
+    def collect_outputs(self) -> list:
+        """TODO Docs"""
+        list_of_outputs = self.layers.output_layer.neurodes
+        output_data = []
+        for node in list_of_outputs:
+            output_data.append([node.value])
+        return output_data
+
     # Math Functions ----------------------------------------------------------
-    def calculate_error(self, label_values):
+    def calculate_error(self, labels):
         """
         Helper function which calculates the squared error of each label
         against the predicted values from the output layer.
 
         Args:
-            label_values: expected label values to compare against observed
+            labels: expected label values to compare against observed
             values from output nodes.
 
         Returns:
             calculates the squared error of the output nodes
 
         """
-        list_of_outputs = list(self.layers.get_output_nodes())
-        size = len(list_of_outputs)
+        outputs = self.collect_outputs()
+        size = outputs.__sizeof__()
         total_error = 0
-        for index, node in enumerate(list_of_outputs):
-            error = node.value - label_values[index]
+        for index, node in enumerate(outputs):
+            value = self.round_test_outputs(node[0], labels[index])
+            error = value - labels[index]
             total_error += np.power(error, 2)
         return total_error / size
 
@@ -182,6 +198,42 @@ class FFBPNetwork:
             Root mean squared error (float)
         """
         return np.sqrt(squared_error / size)
+
+    @staticmethod
+    # TODO FIX ME
+    def round_test_outputs(observed_output, observed_input):
+        """TODO Docs"""
+        if observed_input == 1 or observed_input == 0:
+            if observed_output > .5:
+                return 1
+            else:
+                return 0
+        else:
+            return observed_output
+
+    # Print Functions ---------------------------------------------------------
+    @staticmethod
+    # TODO FIX ME
+    def print_training_data(verbosity, epoch, output: list,
+                            label: list, rmse=0.0):
+        """TODO Docs"""
+
+        if verbosity > 1 and epoch % 1000 == 0:
+            ret_string = '['
+            for i in range(len(output)):
+                ret_string += str(FFBPNetwork.round_test_outputs(output[i],
+                                                                 label[i]))
+                ret_string += ', '
+                ret_string += str(label[i])
+                ret_string += ']\n'
+            print(ret_string)
+        if verbosity > 0 and epoch % 100 == 0:
+            print("Epoch: ", epoch, "RMSE: ", rmse)
+
+    # TODO FIX ME
+    def print_testing_data(self):
+        """TODO Docs"""
+        pass
 
 
 class EmptyLayerException(Exception):
