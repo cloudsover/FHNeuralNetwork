@@ -82,7 +82,6 @@ class DoublyLinkedList:
         """
         if self.head is None:
             self.head = self.tail = new_node
-            self.current = self.head
             self.head.set_prev(None)
             self.tail.set_next(None)
         else:
