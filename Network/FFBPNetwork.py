@@ -191,7 +191,7 @@ class FFBPNetwork:
         size = outputs.__sizeof__()
         total_error = 0
         for index, node in enumerate(outputs):
-            value = self.round_test_outputs(node[0], labels[index])
+            value = node.value
             error = value - labels[index]
             total_error += np.power(error, 2)
         return total_error / size
@@ -213,15 +213,17 @@ class FFBPNetwork:
 
     @staticmethod
     # TODO FIX ME
-    def round_test_outputs(observed_output, observed_input):
+    def round_test_outputs(observed_output) -> list:
         """TODO Docs"""
-        if observed_input == 1 or observed_input == 0:
-            if observed_output > .5:
-                return 1
+
+        ret_list = []
+        for index, output in enumerate(observed_output):
+            if output >= 5:
+                rounded_output = 1
             else:
-                return 0
-        else:
-            return observed_output
+                rounded_output = 0
+            ret_list.append(rounded_output)
+        return ret_list
 
     # Print Functions ---------------------------------------------------------
     @staticmethod
@@ -243,7 +245,7 @@ class FFBPNetwork:
             print("Epoch: ", epoch, "RMSE: ", rmse)
 
     # TODO FIX ME
-    def print_testing_data(self):
+    def print_testing_data(self, label_data):
         """TODO Docs"""
         pass
 
