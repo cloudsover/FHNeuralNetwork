@@ -1,6 +1,7 @@
 """Module which ties together the layers and nodes into a Neural Network."""
 
 import numpy as np
+import matplotlib.pyplot as plt
 from Network.NNData import NNData
 from Network.LayerList import LayerList
 
@@ -18,6 +19,10 @@ class FFBPNetwork:
     def __init__(self, num_inputs=1, num_outputs=1):
         """Inits FFBPNetwork with all attributes initialized"""
         self.layers = LayerList(num_inputs, num_outputs)
+        self._visualize_x = []
+        self._visualize_y = []
+        self._visualize_rmse = []
+        self._visualize_epoch = []
 
     def add_hidden_layer(self, num_neurodes: int = 5):
         """
@@ -161,6 +166,13 @@ class FFBPNetwork:
             output_data.append([node.value])
         return output_data
 
+    def _clear_vis(self):
+        """TODO Docs"""
+        self._visualize_x = []
+        self._visualize_y = []
+        self._visualize_rmse = []
+        self._visualize_epoch = []
+
     # Math Functions ----------------------------------------------------------
     def calculate_error(self, labels):
         """
@@ -234,6 +246,18 @@ class FFBPNetwork:
     def print_testing_data(self):
         """TODO Docs"""
         pass
+
+    # Plotting Functions ------------------------------------------------------
+
+    def plot_output_comparison(self):
+        """TODO Docs"""
+        plt.plot(self._visualize_x, self._visualize_y)
+        plt.show()
+
+    def plot_rmse(self):
+        """TODO Docs"""
+        plt.plot(self._visualize_epoch, self._visualize_rmse)
+        plt.show()
 
 
 class EmptyLayerException(Exception):
@@ -545,7 +569,6 @@ def main():
     def run_tests():
         network = FFBPNetwork(1, 1)
         network.add_hidden_layer(3)
-        # clean this upo
         network.add_hidden_layer(4)
         network.layers.reset_cur()
         while True:
