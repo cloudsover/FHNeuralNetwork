@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from Network.NNData import NNData
 from Network.LayerList import LayerList
 
@@ -20,9 +21,8 @@ class FFBPNetwork:
         """Inits FFBPNetwork with all attributes initialized"""
         self.layers = LayerList(num_inputs, num_outputs)
         self._visualize_x = []
+        self._visualize_y_nw = []
         self._visualize_y = []
-        self._visualize_rmse = []
-        self._visualize_epoch = []
 
     def add_hidden_layer(self, num_neurodes: int = 5):
         """
@@ -54,28 +54,55 @@ class FFBPNetwork:
         if data_set.x is None:
             raise EmptySetException
         else:
-            print("Training:")
+            print("\nTraining:")
 
             for epoch in range(epochs):
                 data_set.prime_data(NNData.Set.TRAIN, order)
                 self.run_train_data(data_set, verbosity, epoch)
 
-    def test(self, data_set: NNData, order=NNData.Order.RANDOM):
+    def test(self, data_set: NNData, order=NNData.Order.RANDOM, one_hot=0):
         """
         This function runs the testing data through the neural network.
 
         Args:
             data_set (NNData): Object containing the testing data
             order: Order selection to randomize data or keep sequential
+            one_hot: one hot encoding label data
         """
 
         if data_set.y is None:
             raise EmptySetException
         else:
-            print("Testing:")
+            print("\nTesting:")
             data_set.prime_data(NNData.Set.TEST, order)
-            rmse = self.run_test_data(data_set)
+            rmse = self.run_test_data(data_set, one_hot)
             print("Final RMSE:", rmse)
+
+    def iterate(self):
+        """
+        This function iterates the current pointer to the next
+        layer.
+        """
+        self.layers.iterate()
+
+    def rev_iterate(self):
+        """This function reverse iterates the current pointer to the
+        previous layer."""
+        self.layers.rev_iterate()
+
+    def reset_cur(self):
+        """This function resets the current pointer to the input layer."""
+        self.layers.reset_cur()
+
+    def get_layer_info(self):
+        """
+        This function returns the current layer's info and returns type
+        and number of neurons.
+
+        Returns:
+            Tuple of layer type and list of neurodes
+        """
+        self.layers.current.get_layer_info()
 
     # Data Functions ----------------------------------------------------------
     def send_data_to_inputs(self, data):
@@ -137,7 +164,7 @@ class FFBPNetwork:
         self.print_training_data(verbosity, epoch, outputs, labels,
                                  self.calculate_rmse(size, error))
 
-    def run_test_data(self, epoch_data: NNData) -> float:
+    def run_test_data(self, epoch_data: NNData, one_hot=0) -> float:
         """
         Helper function. Runs testing pool example data through the input
         layer, and then compares the predicted values to the expected label
@@ -145,6 +172,7 @@ class FFBPNetwork:
 
         Args:
             epoch_data (NNData): Object containing data set.
+            one_hot: one hot encoding data
 
         Returns:
             rmse (float): Root mean squared error of the test run.
@@ -155,23 +183,48 @@ class FFBPNetwork:
         for _ in range(size):
             single_data = epoch_data.get_one_item(NNData.Set.TEST)
             self.send_data_to_inputs(single_data[0])
+            self._visualize_x.append(single_data[0])
+            self._visualize_y_nw.append(self.collect_outputs(one_hot))
+            self._visualize_y.append(single_data[1])
+            self.print_testing_data(single_data[0],
+                                    self.collect_outputs(one_hot),
+                                    single_data[1])
             error += self.calculate_error(single_data[1])
         return self.calculate_rmse(size, error)
 
-    def collect_outputs(self) -> list:
+    def collect_outputs(self, one_hot=0) -> list:
+        """
+        Helper function which gathers the values in the output layer and
+        returns a list populated with their values.
+
+        Returns:
+            list of values from the output node layer
+        """
+        if one_hot == 1:
+            return self.collect_one_hot()
+        list_of_outputs = self.layers.output_layer.neurodes
+        output_data = []
+        for node in list_of_outputs:
+            output_data.append(node.value)
+        return output_data
+
+    def collect_one_hot(self) -> list:
         """TODO Docs"""
         list_of_outputs = self.layers.output_layer.neurodes
         output_data = []
         for node in list_of_outputs:
-            output_data.append([node.value])
+            value = 0
+            if node.value > .7:
+                value = 1
+            else:
+                value = 0
+            output_data.append(value)
         return output_data
 
     def _clear_vis(self):
-        """TODO Docs"""
+        """Resets the two lists which hold the visualize data"""
         self._visualize_x = []
         self._visualize_y = []
-        self._visualize_rmse = []
-        self._visualize_epoch = []
 
     # Math Functions ----------------------------------------------------------
     def calculate_error(self, labels):
@@ -187,7 +240,7 @@ class FFBPNetwork:
             calculates the squared error of the output nodes
 
         """
-        outputs = self.collect_outputs()
+        outputs = self.layers.output_layer.neurodes
         size = outputs.__sizeof__()
         total_error = 0
         for index, node in enumerate(outputs):
@@ -211,32 +264,32 @@ class FFBPNetwork:
         """
         return np.sqrt(squared_error / size)
 
-    @staticmethod
-    # TODO FIX ME
-    def round_test_outputs(observed_output) -> list:
-        """TODO Docs"""
-
-        ret_list = []
-        for index, output in enumerate(observed_output):
-            if output >= 5:
-                rounded_output = 1
-            else:
-                rounded_output = 0
-            ret_list.append(rounded_output)
-        return ret_list
-
     # Print Functions ---------------------------------------------------------
     @staticmethod
-    # TODO FIX ME
     def print_training_data(verbosity, epoch, output: list,
                             label: list, rmse=0.0):
-        """TODO Docs"""
+        """
+        This function prints out observed values and expected values of the
+        outputs every 1000 epochs, and prints out the epoch number and RMSE
+        values every 100 epochs.
+
+        Args:
+            verbosity: if this value is less than 1, it will not print the
+            label data. If this value is less than 0 it will print nothing
+            epoch: current epoch
+            output: list of output values
+            label: list of label values
+            rmse: root mean squared error
+
+        Returns:
+            Formatted output string of [output, label] data, and RMSE
+
+        """
 
         if verbosity > 1 and epoch % 1000 == 0:
             ret_string = '['
             for i in range(len(output)):
-                ret_string += str(FFBPNetwork.round_test_outputs(output[i],
-                                                                 label[i]))
+                ret_string += str(output[i])
                 ret_string += ', '
                 ret_string += str(label[i])
                 ret_string += ']\n'
@@ -244,22 +297,50 @@ class FFBPNetwork:
         if verbosity > 0 and epoch % 100 == 0:
             print("Epoch: ", epoch, "RMSE: ", rmse)
 
-    # TODO FIX ME
-    def print_testing_data(self, label_data):
-        """TODO Docs"""
-        pass
+    @staticmethod
+    def print_testing_data(input_values, output, label_data):
+        """
+        Printer function which prints the input values, observed output,
+        and expected output values
+
+        Args:
+            input_values (list): input values
+            output (list): output values, observed
+            label_data (list): label values, expected
+
+        Returns:
+            prints out a formatted string
+        """
+        ret_string = ''
+
+        ret_string += str(input_values)
+        ret_string += ', '
+        ret_string += str(output)
+        ret_string += ', '
+        ret_string += str(label_data)
+        ret_string += ']'
+        print(ret_string)
 
     # Plotting Functions ------------------------------------------------------
 
-    def plot_output_comparison(self):
-        """TODO Docs"""
-        plt.plot(self._visualize_x, self._visualize_y)
-        plt.show()
+    def plot_output_comparison(self, scatter=0, plot=0):
+        """
+        Uses matplotlib to visualize the testing data
 
-    def plot_rmse(self):
-        """TODO Docs"""
-        plt.plot(self._visualize_epoch, self._visualize_rmse)
+        """
+        plt.ylim(top=2)
+        plt.ylim(bottom=0)
+        plt.xlim(left=0)
+        plt.xlim(right=2)
+        plt.xlim()
+        if scatter == 1:
+            plt.scatter(self._visualize_x, self._visualize_y, color='r')
+            plt.scatter(self._visualize_x, self._visualize_y_nw, color='g')
+        else:
+            plt.plot(self._visualize_x, self._visualize_y, color='r')
+            plt.plot(self._visualize_x, self._visualize_y_nw, color='g')
         plt.show()
+        self._clear_vis()
 
 
 class EmptyLayerException(Exception):
@@ -270,29 +351,10 @@ class EmptySetException(Exception):
     """Data set is empty"""
 
 
-#     # while epoch < max_epochs:
-#     #     data.prime_data(order=NNData.Order.RANDOM)
-#     #     network.train(data, epoch)
-#     #     network.test(data)
-#     #
-#     #     file_name = 'epoch-' + str(epoch) + '.txt'
-#     #     # with open(file_name, 'w', encoding='utf-8') as my_file:
-#     #     #     file = network.csv
-#     #     #     for line in file:
-#     #     #         my_file.write(line)
-#     #
-#     #     epoch += 1000
-#     # with open('rmse-epoch.txt', 'w', encoding='utf-8') as my_file:
-#     #     file = network.rmse_csv
-#     #     for line in file:
-#     #         my_file.write(line)
-#     print('Fin')
-
-
 def main():
     def run_iris():
         network = FFBPNetwork(4, 3)
-        network.add_hidden_layer(100)
+        network.add_hidden_layer(6)
 
         Iris_X = [[5.1, 3.5, 1.4, 0.2], [4.9, 3, 1.4, 0.2],
                   [4.7, 3.2, 1.3, 0.2],
@@ -449,12 +511,12 @@ def main():
                   [0, 0, 1, ], [0, 0, 1, ],
                   [0, 0, 1, ], [0, 0, 1, ], [0, 0, 1, ]]
         data = NNData(Iris_X, Iris_Y, 45)
-        network.train(data, 1001)
-        network.test(data)
+        network.train(data, 1001, verbosity=0)
+        network.test(data, one_hot=1)
 
     def run_sin():
         network = FFBPNetwork(1, 1)
-        network.add_hidden_layer(3)
+        network.add_hidden_layer(25)
         sin_X = [[0], [0.01], [0.02], [0.03], [0.04], [0.05], [0.06], [0.07],
                  [0.08], [0.09], [0.1], [0.11], [0.12],
                  [0.13], [0.14], [0.15], [0.16], [0.17], [0.18], [0.19], [0.2],
@@ -555,9 +617,10 @@ def main():
                  [0.998152472497548], [0.998710143975583], [0.999167945271476],
                  [0.999525830605479],
                  [0.999783764189357], [0.999941720229966], [0.999999682931835]]
-        data = NNData(sin_X, sin_Y, 30)
-        network.train(data, 1001)
+        data = NNData(sin_X, sin_Y, 45)
+        network.train(data, 3001, verbosity=0)
         network.test(data)
+        network.plot_output_comparison(scatter=1)
 
     def run_XOR():
         network = FFBPNetwork(2, 1)
@@ -566,7 +629,7 @@ def main():
         XORy = [[0], [1], [1], [0]]
         data = NNData(XORx, XORy, 50)
         network.train(data, 1001)
-        network.test(data)
+        network.test(data, one_hot=1)
 
     def run_tests():
         network = FFBPNetwork(1, 1)
@@ -586,10 +649,10 @@ def main():
             if not network.layers.iterate():
                 break
 
-    run_tests()
-    run_iris()
+    # run_tests()
+    # run_iris()
     run_sin()
-    run_XOR()
+    # run_XOR()
 
 
 if __name__ == "__main__":
