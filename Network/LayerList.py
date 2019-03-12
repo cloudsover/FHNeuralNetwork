@@ -181,98 +181,102 @@ class NodePositionError(Exception):
     head or tail."""
     pass
 
+
 #
-# def main():
-#     # create a LayerList with two inputs and four outputs
-#     my_list = LayerList(2, 4)
-#     # get a list of the input and output nodes, and make sure we have the right number
-#     inputs = my_list.get_input_nodes()
-#     outputs = my_list.get_output_nodes()
-#     assert len(inputs) == 2
-#     assert len(outputs) == 4
-#     # check that each has the right number of connections
-#     for node in inputs:
-#         assert len(node.output_nodes) == 4
-#     for node in outputs:
-#         assert len(node.input_nodes) == 2
-#     # check that the connections go to the right place
-#     for node in inputs:
-#         out_set = set(node.output_nodes)
-#         check_set = set(outputs)
-#         assert out_set == check_set
-#     for node in outputs:
-#         in_set = set(node.input_nodes)
-#         check_set = set(inputs)
-#         assert in_set == check_set
-#     # add a couple layers and check that they arrived in the right order, and that iterate and rev_iterate work
-#     my_list.reset_cur()
-#     my_list.insert_hidden_layer(3)
-#     my_list.insert_hidden_layer(6)
-#     assert my_list.current.get_layer_info() == (LayerType.INPUT, 2)
-#     my_list.iterate()
-#     assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 6)
-#     my_list.iterate()
-#     assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 3)
-#     # save this layer to make sure it gets properly removed later
-#     save_layer_for_later = my_list.current
-#     my_list.iterate()
-#     assert my_list.current.get_layer_info() == (LayerType.OUTPUT, 4)
-#     my_list.rev_iterate()
-#     assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 3)
-#     # check that information flows through all layers
-#     save_vals = []
-#
-#     for node in outputs:
-#         save_vals.append(node.get_value())
-#     for node in inputs:
-#         node.receive_input(1)
-#     for i, node in enumerate(outputs):
-#         assert save_vals[i] != node.get_value()
-#     # check that information flows back as well
-#     save_vals = []
-#     for node in inputs[1].output_nodes:
-#         save_vals.append(node.get_delta())
-#     for node in outputs:
-#         node.receive_back_input(None, 1)
-#     for i, node in enumerate(inputs[1].output_nodes):
-#         assert save_vals[i] != node.get_delta()
-#     # try to remove an output layer
-#     try:
-#         my_list.remove_hidden_layer()
-#         assert False
-#     except NodePositionError:
-#         pass
-#     except:
-#         assert False
-#     # move and remove a hidden layer
-#     my_list.rev_iterate()
-#     my_list.remove_hidden_layer()
-#     # check the order of layers again
-#     my_list.reset_cur()
-#     assert my_list.current.get_layer_info() == (LayerType.INPUT, 2)
-#     my_list.iterate()
-#     assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 6)
-#     my_list.iterate()
-#     assert my_list.current.get_layer_info() == (LayerType.OUTPUT, 4)
-#     my_list.rev_iterate()
-#     assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 6)
-#     # save a value from the removed layer to make sure it doesn't get changed
-#     saved_val = save_layer_for_later.get_my_neurodes()[0].get_value()
-#     # check that information still flows through all layers
-#     save_vals = []
-#     for node in outputs:
-#         save_vals.append(node.get_value())
-#     for node in inputs:
-#         node.receive_input(input_value=1)
-#     for i, node in enumerate(outputs):
-#         assert save_vals[i] != node.get_value()
-#     # check that information still flows back as well
-#     save_vals = []
-#     for node in inputs[1].output_nodes:
-#         save_vals.append(node.get_delta())
-#     for node in outputs:
-#         node.receive_back_input(None, 1)
-#     for i, node in enumerate(inputs[1].output_nodes):
-#         assert save_vals[i] != node.get_delta()
-#     assert saved_val == save_layer_for_later.get_my_neurodes()[0].get_value()
-#
+def main():
+    # create a LayerList with two inputs and four outputs
+    my_list = LayerList(2, 4)
+    # get a list of the input and output nodes, and make sure we have the right number
+    inputs = my_list.get_input_nodes()
+    outputs = my_list.get_output_nodes()
+    assert len(inputs) == 2
+    assert len(outputs) == 4
+    # check that each has the right number of connections
+    for node in inputs:
+        assert len(node.output_nodes) == 4
+    for node in outputs:
+        assert len(node.input_nodes) == 2
+    # check that the connections go to the right place
+    for node in inputs:
+        out_set = set(node.output_nodes)
+        check_set = set(outputs)
+        assert out_set == check_set
+    for node in outputs:
+        in_set = set(node.input_nodes)
+        check_set = set(inputs)
+        assert in_set == check_set
+    # add a couple layers and check that they arrived in the right order, and that iterate and rev_iterate work
+    my_list.reset_cur()
+    my_list.insert_hidden_layer(3)
+    my_list.insert_hidden_layer(6)
+    assert my_list.current.get_layer_info() == (LayerType.INPUT, 2)
+    my_list.iterate()
+    assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 6)
+    my_list.iterate()
+    assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 3)
+    # save this layer to make sure it gets properly removed later
+    save_layer_for_later = my_list.current
+    my_list.iterate()
+    assert my_list.current.get_layer_info() == (LayerType.OUTPUT, 4)
+    my_list.rev_iterate()
+    assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 3)
+    # check that information flows through all layers
+    save_vals = []
+
+    for node in outputs:
+        save_vals.append(node.get_value())
+    for node in inputs:
+        node.receive_input(1)
+    for i, node in enumerate(outputs):
+        assert save_vals[i] != node.get_value()
+    # check that information flows back as well
+    save_vals = []
+    for node in inputs[1].output_nodes:
+        save_vals.append(node.get_delta())
+    for node in outputs:
+        node.receive_back_input(None, 1)
+    for i, node in enumerate(inputs[1].output_nodes):
+        assert save_vals[i] != node.get_delta()
+    # try to remove an output layer
+    try:
+        my_list.remove_hidden_layer()
+        assert False
+    except NodePositionError:
+        pass
+    except:
+        assert False
+    # move and remove a hidden layer
+    my_list.rev_iterate()
+    my_list.remove_hidden_layer()
+    # check the order of layers again
+    my_list.reset_cur()
+    assert my_list.current.get_layer_info() == (LayerType.INPUT, 2)
+    my_list.iterate()
+    assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 6)
+    my_list.iterate()
+    assert my_list.current.get_layer_info() == (LayerType.OUTPUT, 4)
+    my_list.rev_iterate()
+    assert my_list.current.get_layer_info() == (LayerType.HIDDEN, 6)
+    # save a value from the removed layer to make sure it doesn't get changed
+    saved_val = save_layer_for_later.get_my_neurodes()[0].get_value()
+    # check that information still flows through all layers
+    save_vals = []
+    for node in outputs:
+        save_vals.append(node.get_value())
+    for node in inputs:
+        node.receive_input(input_value=1)
+    for i, node in enumerate(outputs):
+        assert save_vals[i] != node.get_value()
+    # check that information still flows back as well
+    save_vals = []
+    for node in inputs[1].output_nodes:
+        save_vals.append(node.get_delta())
+    for node in outputs:
+        node.receive_back_input(None, 1)
+    for i, node in enumerate(inputs[1].output_nodes):
+        assert save_vals[i] != node.get_delta()
+    assert saved_val == save_layer_for_later.get_my_neurodes()[0].get_value()
+    print("Done!")
+
+
+main()

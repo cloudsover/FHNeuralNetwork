@@ -627,7 +627,7 @@ def main():
         network.add_hidden_layer(3)
         XORx = [[0, 0], [1, 0], [0, 1], [1, 1]]
         XORy = [[0], [1], [1], [0]]
-        data = NNData(XORx, XORy, 50)
+        data = NNData(XORx, XORy, 100)
         network.train(data, 1001)
         network.test(data, one_hot=1)
 
