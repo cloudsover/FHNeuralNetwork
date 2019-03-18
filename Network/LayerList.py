@@ -28,14 +28,14 @@ class LayerList(DoublyLinkedList):
             num_outputs: number of output nodes in the output layer
         """
         super().__init__()
-        self.input_layer: Layer = Layer(num_inputs, LayerType.INPUT)
-        self.output_layer = Layer(num_outputs, LayerType.OUTPUT)
+        input_layer: Layer = Layer(num_inputs, LayerType.INPUT)
+        output_layer = Layer(num_outputs, LayerType.OUTPUT)
 
-        self.add_to_head(self.input_layer)
+        self.add_to_head(input_layer)
         self.reset_cur()
-        self.reconnect_outputs(self.input_layer, self.output_layer)
+        self.reconnect_outputs(input_layer, output_layer)
 
-        self.insert_after_cur(self.output_layer)
+        self.insert_after_cur(output_layer)
 
     def get_input_nodes(self) -> list:
         """
@@ -45,7 +45,7 @@ class LayerList(DoublyLinkedList):
         Returns:
             list of input neurodes
         """
-        return self.input_layer.get_my_neurodes()
+        return self.head.get_my_neurodes()
 
     def get_output_nodes(self) -> list:
         """
@@ -56,7 +56,7 @@ class LayerList(DoublyLinkedList):
             list of output neurodes
         """
 
-        return self.output_layer.get_my_neurodes()
+        return self.tail.get_my_neurodes()
 
     def insert_after_cur(self, new_layer):
         """

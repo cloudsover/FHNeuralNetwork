@@ -2,7 +2,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 from Network.NNData import NNData
 from Network.LayerList import LayerList
 
@@ -114,7 +113,7 @@ class FFBPNetwork:
         Args:
             data (list): example data to send to the input layer nodes.
         """
-        list_of_inputs = self.layers.input_layer.neurodes
+        list_of_inputs = self.layers.get_input_nodes()
 
         for index, node in enumerate(list_of_inputs):
             node.receive_input(None, data[index])
@@ -129,7 +128,7 @@ class FFBPNetwork:
         Args:
             data (list): example data to send to the output layer nodes.
         """
-        list_of_outputs = self.layers.output_layer.neurodes
+        list_of_outputs = self.layers.get_output_nodes()
 
         for index, node in enumerate(list_of_outputs):
             node.receive_back_input(None, data[index])
@@ -202,7 +201,7 @@ class FFBPNetwork:
         """
         if one_hot == 1:
             return self.collect_one_hot()
-        list_of_outputs = self.layers.output_layer.neurodes
+        list_of_outputs = self.layers.get_output_nodes()
         output_data = []
         for node in list_of_outputs:
             output_data.append(node.value)
@@ -210,7 +209,7 @@ class FFBPNetwork:
 
     def collect_one_hot(self) -> list:
         """TODO Docs"""
-        list_of_outputs = self.layers.output_layer.neurodes
+        list_of_outputs = self.layers.get_output_nodes()
         output_data = []
         for node in list_of_outputs:
             value = 0
@@ -240,7 +239,7 @@ class FFBPNetwork:
             calculates the squared error of the output nodes
 
         """
-        outputs = self.layers.output_layer.neurodes
+        outputs = self.layers.get_output_nodes()
         size = outputs.__sizeof__()
         total_error = 0
         for index, node in enumerate(outputs):
@@ -618,9 +617,9 @@ def main():
                  [0.999525830605479],
                  [0.999783764189357], [0.999941720229966], [0.999999682931835]]
         data = NNData(sin_X, sin_Y, 45)
-        network.train(data, 3001, verbosity=0)
+        network.train(data, 1, verbosity=1)
         network.test(data)
-        network.plot_output_comparison(scatter=1)
+        network.plot_output_comparison()
 
     def run_XOR():
         network = FFBPNetwork(2, 1)
