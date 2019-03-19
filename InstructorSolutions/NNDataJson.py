@@ -1,85 +1,87 @@
 """This module encodes and decodes NNData objects to and from json objects"""
 import json
 from collections import deque
-from Network.NNData import NNData
-from Network.FFBPNetwork import FFBPNetwork
+from InstructorSolutions import NNData
+from InstructorSolutions.Network import FFBPNetwork
 
 
-def read_file(data_file: NNData):
-    """
-    This helper function takes in a NNData object and outputs the class
-    attributes to translate in the json encoder
+class NNDataJson(json.encoder):
 
-    Args:
-        data_file: NNData object to read
-    Returns:
-        x_data (list) : x example data
-        y_data (list) : y label data
-        train_percentage (int) : percentage of train data
-        train_pool (deque): train pool data
-        test_pool (deque): testing pool data
-        test_indices (list): test indices pointers
-        train_indices (list): train indices pointers
-    """
-    x_data = data_file.x
-    y_data = data_file.y
-    train_percentage = data_file.train_percentage
-    test_pool = data_file.test_pool
-    train_pool = data_file.train_pool
-    test_indices = data_file.test_indices
-    train_indices = data_file.train_indices
+    def __init__(self):
+        pass
 
-    return x_data, y_data, train_percentage, list(train_pool), \
-           list(test_pool), test_indices, train_indices
+    def read_file(data_file: NNData):
+        """
+        This helper function takes in a NNData object and outputs the class
+        attributes to translate in the json encoder
 
+        Args:
+            data_file: NNData object to read
+        Returns:
+            x_data (list) : x example data
+            y_data (list) : y label data
+            train_percentage (int) : percentage of train data
+            train_pool (deque): train pool data
+            test_pool (deque): testing pool data
+            test_indices (list): test indices pointers
+            train_indices (list): train indices pointers
+        """
+        x_data = data_file.x
+        y_data = data_file.y
+        train_percentage = data_file.train_percentage
+        test_pool = data_file.test_pool
+        train_pool = data_file.train_pool
+        test_indices = data_file.test_indices
+        train_indices = data_file.train_indices
 
-def encode_file(file_name: NNData) -> json:
-    """
-    Takes in a NNData object and outputs an encoded JSON file
+        return x_data, y_data, train_percentage, list(train_pool), \
+               list(test_pool), test_indices, train_indices
 
-    Args:
-        file_name: NNData object to encode
+    def encode_file(self, file_name: NNData) -> json:
+        """
+        Takes in a NNData object and outputs an encoded JSON file
 
-    Returns:
-        encoded json file
-    """
-    x_data, y_data, percentage, train, test, test_index, train_index = \
-        read_file(file_name)
+        Args:
+            file_name: NNData object to encode
 
-    data = {"__NNData__": {"train_percentage": percentage,
-                           "x": x_data,
-                           "y": y_data,
-                           "train_indices": train_index,
-                           "test_indices": test_index,
-                           "train_pool": {'__deque__': train},
-                           "test_pool": {'__deque__': test}}}
-    return json.dumps(data)
+        Returns:
+            encoded json file
+        """
+        x_data, y_data, percentage, train, test, test_index, train_index = \
+            self.read_file(file_name)
 
+        data = {"__NNData__": {"train_percentage": percentage,
+                               "x": x_data,
+                               "y": y_data,
+                               "train_indices": train_index,
+                               "test_indices": test_index,
+                               "train_pool": {'__deque__': train},
+                               "test_pool": {'__deque__': test}}}
+        return data
 
-def decode_file(file: json) -> NNData:
-    """
-    Takes in a json file and outputs a NNData object
+    def decode_file(file) -> NNData:
+        """
+        Takes in a json file and outputs a NNData object
 
-    Args:
-        file: json object to decode
+        Args:
+            file: json object to decode
 
-    Returns:
-        NNData object with all attributes initialized
-    """
-    dct = json.loads(file)
-    data = dct['__NNData__']
-    new_data = NNData(data['x'], data['y'], data['train_percentage'])
-    new_data.train_indices = data['train_indices']
-    new_data.test_indices = data['test_indices']
+        Returns:
+            NNData object with all attributes initialized
+        """
+        data = file['__NNData__']
+        new_data = NNData(data['x'], data['y'], data['train_percentage'])
+        new_data.train_indices = data['train_indices']
+        new_data.test_indices = data['test_indices']
 
-    test_pool = data['test_pool']
-    train_pool = data['train_pool']
-    new_data.test_pool = deque(test_pool['__deque__'])
-    new_data.train_pool = deque(train_pool['__deque__'])
-    new_data.train_data = (new_data.train_indices, new_data.train_pool)
-    new_data.test_data = (new_data.test_indices, new_data.test_pool)
+        test_pool = data['test_pool']
+        train_pool = data['train_pool']
+        new_data.test_pool = deque(test_pool['__deque__'])
+        new_data.train_pool = deque(train_pool['__deque__'])
+        new_data.train_data = (new_data.train_indices, new_data.train_pool)
+        new_data.test_data = (new_data.test_indices, new_data.test_pool)
 
-    return new_data
+        return new_data
 
 
 def main():
@@ -89,8 +91,8 @@ def main():
     xor_y = [[0], [1], [1], [0]]
     xor_data = NNData(xor_x, xor_y, 90)
 
-    xor_data_encoded = encode_file(xor_data)
-    xor_data_decoded = decode_file(xor_data_encoded)
+    xor_data_encoded = json.loads(xor_data, cls=NNDataJson.encode_file)
+    xor_data_decoded = json.dumps(xor_data_encoded, cls=NNDataJson.decode_file)
 
     network = FFBPNetwork(2, 1)
     network.add_hidden_layer(3)
@@ -582,9 +584,9 @@ def main():
                                                     """
 
     network = FFBPNetwork(1, 1)
-    sin_encoded = decode_file(sin_json)
-    network.train(sin_encoded, 3001, verbosity=0)
-    network.test(sin_encoded)
+    # sin_encoded = decode_file(sin_json)
+    # network.train(sin_encoded, 3001, verbosity=0)
+    # network.test(sin_encoded)
 
 
 if __name__ == '__main__':

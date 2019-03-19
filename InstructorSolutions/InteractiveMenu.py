@@ -12,6 +12,7 @@ class InteractiveMenu:
         self.running = True
         self.data_loaded = False
         self.data = None
+        self.stored_data = {}
         self.train_percentage = 10
         self.network = FFBPNetwork(1, 1)
 
@@ -32,8 +33,8 @@ class InteractiveMenu:
         """TODO Docs"""
         ret_string = ''
         layer_type, num_neurodes = self.network.layers.current.get_layer_info()
-        ret_string += f'Current Layer Type:{layer_type}\n' \
-            f'Neurodes in layer: {num_neurodes}\n'
+        ret_string += f'Current Layer Type:{layer_type}\n'
+        ret_string += f'Neurodes in layer: {num_neurodes}\n'
         return ret_string
 
     def load_json(self, filename):

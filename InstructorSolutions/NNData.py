@@ -20,8 +20,6 @@ class DataMismatchError(Exception):
     """ number of X and Y elements do not match"""
     pass
 
-
-class NNData:
     class Order(Enum):
         RANDOM = 0
         SEQUENTIAL = 1
@@ -29,6 +27,9 @@ class NNData:
     class Set(Enum):
         TRAIN = 0
         TEST = 1
+
+
+class NNData:
 
     def __init__(self, x=None, y=None, train_percentage=100):
 
