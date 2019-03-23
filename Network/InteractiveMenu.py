@@ -1,4 +1,5 @@
-"""TODO Docs"""
+"""This module provides an interactive menu to load and train data on a
+simple neural network."""
 import json
 
 from Network import NNDataJson, NNData
@@ -6,7 +7,21 @@ from Network.FFBPNetwork import FFBPNetwork
 
 
 class InteractiveMenu:
-    """TODO Docs"""
+    """
+
+    Attributes:
+        self.MAIN_MENU (str): Formatted string for the main menu
+        self.LOAD_DATA (str): Formatted string for the load data submenu
+        self.BROWSE (str): Formatted string for the browse layers submenu
+        self.NEW (str): Placeholder for custom data set
+        self.XOR (str): JSON object for XOR data set
+        self.SIN (str): JSON object for SIN data set
+        running (bool): Boolean flag if the user has quit or not
+        data_loaded (NNData): Currently loaded data set
+        train_percentage (int): Train percentage for the network
+        network (FFBPNetwork): FFBPNetwork object which runs the data
+        data_stored (list): List of JSON objects which can be loaded
+    """
 
     MAIN_MENU = f'\nMain Menu:\n 1) Load/Re-load Json\n 2)Browse Network ' \
         f'Layers\n 3)Run Network\n 4)Quit\n'
@@ -18,17 +33,19 @@ class InteractiveMenu:
     NEW = None
 
     def __init__(self):
-        """TODO Docs"""
+        """
+        Inits InteractiveMenu with all class attributes initialized
+        """
         self.running = True
         self.data_loaded = False
-        self.stored_data = {}
         self.train_percentage = 10
         self.network = FFBPNetwork(1, 1)
         self.data_stored = [self.XOR, self.SIN, self.NEW]
         self.network.reset_cur()
 
     def main_menu(self):
-        """TODO Docs"""
+        """This function runs the user through the main menu of the neural
+        network."""
 
         while self.running:
             choice = None
@@ -43,16 +60,11 @@ class InteractiveMenu:
             if int(choice) == 4:
                 self.running = False
                 print("Goodbye")
-        # TODO Browse network layers
-        # TODO Layer Type, Num Neurodes
-        # TODO Add Layer after current
-        # TODO Remove current layer
-        # TODO Run network
-        # TODO Quit
-        pass
 
     def load_data(self):
-        """TODO Docs"""
+        """Data-loading submenu. Presents the user with three choices of
+        data to load and then loads the chosen JSON object into an NNData
+        object."""
         loading_data = True
 
         while loading_data:
@@ -73,7 +85,10 @@ class InteractiveMenu:
                 loading_data = False
 
     def browse_layers(self):
-        """TODO Docs"""
+        """Layer-browsing submenu which presents the user with the options
+        to iterate through the layers while reporting their layer type and
+        number of inputs, add a hidden layer given a number of neurodes,
+        and remove the current layer if it is a hidden layer."""
         browsing_layers = True
 
         while browsing_layers:
@@ -100,7 +115,13 @@ class InteractiveMenu:
                 browsing_layers = False
 
     def visualize_layer(self) -> str:
-        """TODO Docs"""
+        """
+        Helper function which outputs a formatted string of the current
+        layer in the network with it's layer type and number of neurodes.
+
+        Returns:
+            (str) formatted string of current layer
+        """
         ret_string = ''
         layer_type, num_neurodes = self.network.layers.current.get_layer_info()
         ret_string += f'Current Layer Type:{layer_type}\n'
@@ -108,45 +129,62 @@ class InteractiveMenu:
         return ret_string
 
     def load_json(self, data_set):
-        """TODO Docs"""
-        # TODO Make this work
+        """Helper function which sets the data_loaded attribute to the
+        given data set"""
         data = data_set
         self.data_loaded = json.loads(data,
                                       object_hook=NNDataJson.nn_data_decoder)
 
     def iterate_layers(self):
-        """TODO Docs"""
+        """Helper function which iterates through the network layers as long as
+        the current pointer is not at the tail of the layer list"""
         if self.network.layers.current is not self.network.layers.tail:
             return self.network.iterate()
 
     def rev_iterate_layers(self):
-        """TODO Docs"""
+        """Helper function which reverse-iterates through the network as
+        long as the current pointer is not at the head of the layer list"""
         if self.network.layers.current is not self.network.layers.head:
             return self.network.rev_iterate()
 
     def add_layer(self, num_neurodes):
-        """TODO Docs"""
+        """
+        Helper function which adds a hidden layer to the network as long
+        as the current pointer is not at the tail of the network
+
+        Args:
+            num_neurodes (int): number of neurodes to initialize in layer
+
+        Returns:
+            network with new hidden layer added
+        """
         if self.network.layers.current is not self.network.layers.tail:
             return self.network.add_hidden_layer(num_neurodes)
 
     def remove_layer(self):
-        """TODO Docs"""
+        """
+        Helper function which removes a hidden layer at the current
+        pointer position as long as the current pointer is not the head or
+        the tail of the network.
+
+        Returns:
+            network with hidden layer removed
+        """
         if self.network.layers is not self.network.layers.tail or \
                 self.network.layers is not self.network.layers.head:
             self.rev_iterate_layers()
             return self.network.layers.remove_hidden_layer()
 
     def run(self):
-        """TODO Docs"""
+        """Network run submenu which asks for epochs and sequence order of
+        data before running the train and test functions on the network
+        given the loaded data set."""
         set_up_run = True
 
         while set_up_run:
             num_epochs = 0
             while num_epochs == 0:
                 num_epochs = input("How many epochs?")
-            # learning_rate = 0
-            # # while learning_rate == 0:
-            # #     learning_rate = input("What learning rate for the network?")
             order_choice = 0
             while int(order_choice) == 0:
                 order_choice = input(f"1)Sequential Order\n2)Random\n")
@@ -161,7 +199,18 @@ class InteractiveMenu:
 
     def run_network(self, num_epochs, verbosity: int = 2,
                     order: NNData.Order = NNData.Order.SEQUENTIAL):
-        """TODO Docs"""
+        """
+        Helper function which runs the network train and test functions.
+        Returns if there is no data loaded.
+
+        Args:
+            num_epochs (int): number of epochs to run the loaded data
+            verbosity (int): level of verbosity for the network
+            order (NNData.Order): Order sequence of data
+        """
+        if not self.data_loaded:
+            print("Please load a data set")
+            return
 
         self.network.train(self.data_loaded, num_epochs, verbosity,
                            order)
@@ -661,6 +710,7 @@ class InteractiveMenu:
 
 
 def main():
+    """Main testing function"""
     menu = InteractiveMenu()
     menu.main_menu()
 
